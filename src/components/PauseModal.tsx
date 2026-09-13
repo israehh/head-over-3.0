@@ -72,8 +72,12 @@ export const PauseModal: React.FC<PauseModalProps> = ({
     { id: 5, name: 'Fragment V: Chrono Resonance', sector: 'SEC-19 (Sanctum Antechamber)', quadrant: 'Omega' },
   ];
 
-  const handleExportJson = () => {
+  const handleExportJson = async () => {
     const jsonStr = engine.exportSaveJson();
+    if (typeof window !== 'undefined' && window.electronAPI?.exportSaveFileDialog) {
+      await window.electronAPI.exportSaveFileDialog(jsonStr, `hoh2_station_save_${Date.now()}.json`);
+      return;
+    }
     const blob = new Blob([jsonStr], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -81,6 +85,16 @@ export const PauseModal: React.FC<PauseModalProps> = ({
     a.download = `hoh2_station_save_${Date.now()}.json`;
     a.click();
     URL.revokeObjectURL(url);
+  };
+
+  const handleNativeImport = async () => {
+    if (typeof window !== 'undefined' && window.electronAPI?.importSaveFileDialog) {
+      const res = await window.electronAPI.importSaveFileDialog();
+      if (!res.canceled && res.content) {
+        engine.importSaveJson(res.content);
+        setShowImportBox(false);
+      }
+    }
   };
 
   const handleCopyJson = () => {
@@ -614,12 +628,22 @@ export const PauseModal: React.FC<PauseModalProps> = ({
                     >
                       <Download className="w-3.5 h-3.5 text-indigo-400" /> Export File
                     </button>
-                    <button
-                      onClick={() => setShowImportBox(!showImportBox)}
-                      className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-mono transition-colors"
-                    >
-                      <FileText className="w-3.5 h-3.5 text-cyan-400" /> Import JSON
-                    </button>
+                    {typeof window !== 'undefined' && window.electronAPI ? (
+                      <button
+                        onClick={handleNativeImport}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-cyan-950 hover:bg-cyan-900 border border-cyan-700 text-cyan-300 text-xs font-mono transition-colors"
+                        title="Open file from desktop"
+                      >
+                        <FileText className="w-3.5 h-3.5 text-cyan-400" /> Open File...
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => setShowImportBox(!showImportBox)}
+                        className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-mono transition-colors"
+                      >
+                        <FileText className="w-3.5 h-3.5 text-cyan-400" /> Import JSON
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -744,6 +768,35 @@ export const PauseModal: React.FC<PauseModalProps> = ({
                     className="w-full py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-mono transition-colors"
                   >
                     Toggle Coordinates Overlay
+                  </button>
+                </div>
+
+                {/* Desktop Fullscreen Mode */}
+                <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-slate-200">Display Mode</span>
+                    <span className="text-xs font-mono text-emerald-400 uppercase font-semibold">
+                      {typeof document !== 'undefined' && document.fullscreenElement ? 'FULLSCREEN' : 'WINDOWED'}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-400">
+                    Toggle borderless fullscreen display. (Shortcut: F11)
+                  </p>
+                  <button
+                    onClick={async () => {
+                      if (typeof window !== 'undefined' && window.electronAPI?.toggleFullscreen) {
+                        await window.electronAPI.toggleFullscreen();
+                      } else if (typeof document !== 'undefined') {
+                        if (!document.fullscreenElement) {
+                          document.documentElement.requestFullscreen?.().catch(() => {});
+                        } else {
+                          document.exitFullscreen?.().catch(() => {});
+                        }
+                      }
+                    }}
+                    className="w-full py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-300 text-xs font-mono font-semibold transition-colors"
+                  >
+                    Toggle Fullscreen (F11)
                   </button>
                 </div>
               </div>

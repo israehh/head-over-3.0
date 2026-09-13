@@ -1,6 +1,6 @@
 import { sound } from '../audio/soundEffects';
 import { ALL_ROOMS } from '../data/rooms';
-import { roomNetwork, RoomNetworkManager } from './roomNetwork';
+import { buildRoomsFromJson, roomNetwork, RoomNetworkManager } from './roomNetwork';
 import { PuzzleSystem } from './puzzleSystem';
 import {
   CrateEntity,
@@ -48,6 +48,7 @@ export class GameEngine {
   public cameraX: number = 0;
   public cameraY: number = 0;
   public screenShake: number = 0;
+  public transitionCooldown: number = 0;
   public lastInteractPressed: boolean = false;
   public lastJumpPressed: boolean = false;
   public lastCarryPressed: boolean = false;
@@ -153,18 +154,24 @@ export class GameEngine {
     // 6. Check Item Pickups & Collectibles
     this.checkItemCollisions();
 
+    if (this.transitionCooldown > 0) {
+      this.transitionCooldown -= dt;
+    }
+
     // 7. Check Laser Hazards
     this.checkLaserCollisions();
 
     // 8. Check Teleporters & Elevators
-    this.checkTeleporters();
-    this.checkElevators();
+    if (this.transitionCooldown <= 0) {
+      this.checkTeleporters();
+      this.checkElevators();
 
-    // 9. Check Doors & Sector Boundary Exits (North, South, East, West)
-    this.checkDoors();
-    this.roomNetwork.checkCompassExits(this.player, this.currentRoom, (msg) => {
-      this.triggerNotify(msg, 'warn');
-    });
+      // 9. Check Doors & Sector Boundary Exits (North, South, East, West)
+      this.checkDoors();
+      this.roomNetwork.checkCompassExits(this.player, this.currentRoom, (msg) => {
+        this.triggerNotify(msg, 'warn');
+      });
+    }
 
     // 10. Check Exit Portal
     this.checkExitPortal();
@@ -1308,6 +1315,9 @@ export class GameEngine {
     // Immediately evaluate puzzle state upon entering room
     PuzzleSystem.updatePuzzles(this.currentRoom, this.player);
 
+    // Guard against instant bounce-back on room entry
+    this.transitionCooldown = 0.8;
+
     sound.playDoor();
     this.triggerNotify(`ENTERING: ${nextRoom.name}`, 'info');
 
@@ -1432,6 +1442,9 @@ export class GameEngine {
 
   public saveGame(silent: boolean = false): boolean {
     try {
+      // Synchronize latest active room state prior to saving
+      this.roomsState[this.currentRoom.id] = this.currentRoom;
+
       const state = {
         version: '2.0',
         timestamp: Date.now(),
@@ -1442,6 +1455,9 @@ export class GameEngine {
         time: this.time,
       };
       localStorage.setItem('headoverheels2_save', JSON.stringify(state));
+      if (typeof window !== 'undefined' && window.electronAPI?.saveLocal) {
+        window.electronAPI.saveLocal('slot_01', state).catch(() => {});
+      }
       if (!silent) {
         sound.playKeycardPickup();
         this.triggerNotify('PROGRESS SAVED: Station State Secured in Memory Slot.', 'success');
@@ -1463,7 +1479,8 @@ export class GameEngine {
         return false;
       }
       const data = JSON.parse(raw);
-      this.roomsState = data.roomsState;
+      const baseRooms = buildRoomsFromJson();
+      this.roomsState = { ...baseRooms, ...(data.roomsState || {}) };
       this.roomNetwork.roomsState = this.roomsState;
       if (Array.isArray(data.discoveredRooms)) {
         this.roomNetwork.discoveredRooms = new Set(data.discoveredRooms);
@@ -1484,6 +1501,7 @@ export class GameEngine {
       this.isGameOver = false;
       this.isVictory = false;
       this.isPaused = false;
+      this.transitionCooldown = 0.8;
 
       // Re-evaluate puzzle states on loaded room
       PuzzleSystem.updatePuzzles(this.currentRoom, this.player);
@@ -1501,6 +1519,9 @@ export class GameEngine {
   }
 
   public exportSaveJson(): string {
+    // Synchronize latest active room state prior to export
+    this.roomsState[this.currentRoom.id] = this.currentRoom;
+
     const state = {
       version: '2.0',
       timestamp: Date.now(),
@@ -1519,7 +1540,8 @@ export class GameEngine {
       if (!data.roomId || !data.player || !data.roomsState) {
         throw new Error('Invalid save file format');
       }
-      this.roomsState = data.roomsState;
+      const baseRooms = buildRoomsFromJson();
+      this.roomsState = { ...baseRooms, ...(data.roomsState || {}) };
       this.roomNetwork.roomsState = this.roomsState;
       if (Array.isArray(data.discoveredRooms)) {
         this.roomNetwork.discoveredRooms = new Set(data.discoveredRooms);
@@ -1539,6 +1561,7 @@ export class GameEngine {
       this.time = data.time || 0;
       this.isGameOver = false;
       this.isVictory = false;
+      this.transitionCooldown = 0.8;
       const target = this.calcPlayerScreen(this.player);
       this.cameraX = target.x;
       this.cameraY = target.y;

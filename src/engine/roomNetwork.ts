@@ -35,7 +35,8 @@ interface RawJsonRoom {
   doors: any[];
   lasers: any[];
   drones: any[];
-  items: any[];
+  items?: any[];
+  collectibles?: any[];
   teleporters: any[];
   elevators: any[];
   movingElevators?: any[];
@@ -81,7 +82,7 @@ export function buildRoomsFromJson(): { [roomId: string]: RoomDefinition } {
       drones: (raw.drones || []).map((d: any) =>
         EnemyAISystem.initEnemy(JSON.parse(JSON.stringify(d)), raw.id)
       ),
-      items: JSON.parse(JSON.stringify(raw.items || [])),
+      items: JSON.parse(JSON.stringify(raw.items || raw.collectibles || [])),
       teleporters: JSON.parse(JSON.stringify(raw.teleporters || [])),
       elevators: JSON.parse(JSON.stringify(raw.elevators || [])),
       movingElevators: JSON.parse(JSON.stringify(raw.movingElevators || [])),
@@ -173,9 +174,9 @@ export class RoomNetworkManager {
     const centerY = currentRoom.depth / 2;
 
     const isAtNorthEdge = player.y <= MARGIN_EDGE && Math.abs(player.x - centerX) <= 2.8;
-    const isAtSouthEdge = player.y >= currentRoom.depth - 1.95 && Math.abs(player.x - centerX) <= 2.8;
+    const isAtSouthEdge = player.y >= currentRoom.depth - MARGIN_EDGE && Math.abs(player.x - centerX) <= 2.8;
     const isAtWestEdge = player.x <= MARGIN_EDGE && Math.abs(player.y - centerY) <= 2.8;
-    const isAtEastEdge = player.x >= currentRoom.width - 1.95 && Math.abs(player.y - centerY) <= 2.8;
+    const isAtEastEdge = player.x >= currentRoom.width - MARGIN_EDGE && Math.abs(player.y - centerY) <= 2.8;
 
     // 1. NORTH EXIT (moving North)
     if (isAtNorthEdge && exits.north && this.roomsState[exits.north]) {
@@ -185,7 +186,7 @@ export class RoomNetworkManager {
       if (northDoor && !northDoor.isOpen && northDoor.requiredKeycard) {
         if (!player.keycards.includes(northDoor.requiredKeycard)) {
           onRestrictedNotice?.(`ACCESS LOCKED: Requires ${northDoor.requiredKeycard} Keycard`);
-          player.y = MARGIN_EDGE + 0.15; // bounce back slightly
+          player.y = MARGIN_EDGE + 0.25; // bounce back slightly
           return false;
         } else {
           northDoor.isOpen = true;
@@ -193,8 +194,8 @@ export class RoomNetworkManager {
       }
 
       // Preserve player X position relative to target room width
-      const preservedX = Math.max(1.2, Math.min(targetRoom.width - 2.2, player.x));
-      const targetY = targetRoom.depth - 1.4; // Enter from South side of target room
+      const preservedX = Math.max(1.5, Math.min(targetRoom.width - 2.5, player.x));
+      const targetY = targetRoom.depth - 2.0; // Enter safely inside South side of target room
 
       this.startTransition(
         exits.north,
@@ -213,15 +214,15 @@ export class RoomNetworkManager {
       if (southDoor && !southDoor.isOpen && southDoor.requiredKeycard) {
         if (!player.keycards.includes(southDoor.requiredKeycard)) {
           onRestrictedNotice?.(`ACCESS LOCKED: Requires ${southDoor.requiredKeycard} Keycard`);
-          player.y = currentRoom.depth - 1.6;
+          player.y = currentRoom.depth - MARGIN_EDGE - 0.25;
           return false;
         } else {
           southDoor.isOpen = true;
         }
       }
 
-      const preservedX = Math.max(1.2, Math.min(targetRoom.width - 2.2, player.x));
-      const targetY = 1.3; // Enter from North side of target room
+      const preservedX = Math.max(1.5, Math.min(targetRoom.width - 2.5, player.x));
+      const targetY = 2.0; // Enter safely inside North side of target room
 
       this.startTransition(
         exits.south,
@@ -239,15 +240,15 @@ export class RoomNetworkManager {
       if (westDoor && !westDoor.isOpen && westDoor.requiredKeycard) {
         if (!player.keycards.includes(westDoor.requiredKeycard)) {
           onRestrictedNotice?.(`ACCESS LOCKED: Requires ${westDoor.requiredKeycard} Keycard`);
-          player.x = MARGIN_EDGE + 0.15;
+          player.x = MARGIN_EDGE + 0.25;
           return false;
         } else {
           westDoor.isOpen = true;
         }
       }
 
-      const targetX = targetRoom.width - 1.4; // Enter from East side of target room
-      const preservedY = Math.max(1.2, Math.min(targetRoom.depth - 2.2, player.y));
+      const targetX = targetRoom.width - 2.0; // Enter safely inside East side of target room
+      const preservedY = Math.max(1.5, Math.min(targetRoom.depth - 2.5, player.y));
 
       this.startTransition(
         exits.west,
@@ -265,7 +266,7 @@ export class RoomNetworkManager {
       if (eastDoor && !eastDoor.isOpen && eastDoor.requiredKeycard) {
         if (!player.keycards.includes(eastDoor.requiredKeycard)) {
           onRestrictedNotice?.(`ACCESS LOCKED: Requires ${eastDoor.requiredKeycard} Keycard`);
-          player.x = currentRoom.width - 1.6;
+          player.x = currentRoom.width - MARGIN_EDGE - 0.25;
           return false;
         } else {
           eastDoor.isOpen = true;
@@ -277,13 +278,13 @@ export class RoomNetworkManager {
         const fragCount = player.nexusFragments?.length || 0;
         if (fragCount < 5) {
           onRestrictedNotice?.(`OVERMIND GATE LOCKED: All 5 Nexus Fragments Required (${fragCount}/5)`);
-          player.x = currentRoom.width - 1.6;
+          player.x = currentRoom.width - MARGIN_EDGE - 0.25;
           return false;
         }
       }
 
-      const targetX = 1.3; // Enter from West side of target room
-      const preservedY = Math.max(1.2, Math.min(targetRoom.depth - 2.2, player.y));
+      const targetX = 2.0; // Enter safely inside West side of target room
+      const preservedY = Math.max(1.5, Math.min(targetRoom.depth - 2.5, player.y));
 
       this.startTransition(
         exits.east,

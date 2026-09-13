@@ -314,22 +314,8 @@ export class PuzzleSystem {
       }
     }
 
-    // 5. Active laser barriers block crates
-    for (const laser of room.lasers) {
-      if (laser.isActive) {
-        const dist = pointToSegmentDistance(
-          x + 0.5,
-          y + 0.5,
-          laser.startX,
-          laser.startY,
-          laser.endX,
-          laser.endY
-        );
-        if (dist < 0.65 && Math.abs(crate.z - laser.z) < 0.8) {
-          return false;
-        }
-      }
-    }
+    // 5. Note: Active lasers do NOT block crate movement.
+    // Crates intercept, absorb, and occlude laser beams dynamically to solve puzzles.
 
     return true;
   }

@@ -97,10 +97,10 @@ export const GameHUD: React.FC<GameHUDProps> = ({
               id="hud-map-btn"
               onClick={onOpenMap}
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-cyan-950/90 hover:bg-cyan-900 text-cyan-300 border border-cyan-700/70 text-xs font-mono font-bold transition-all hover:scale-105 active:scale-95 shadow-md"
-              title="Open 20-Sector World Map Graph (M)"
+              title="Open Station World Map (M)"
             >
               <MapIcon className="w-3.5 h-3.5 text-cyan-400" />
-              <span className="hidden sm:inline">MAP (20)</span>
+              <span className="hidden sm:inline">MAP</span>
             </button>
           )}
 

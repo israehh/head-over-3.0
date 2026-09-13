@@ -1,10 +1,24 @@
 import React, { useState } from 'react';
-import { Compass, Eye, MapPin, Maximize2, Minimize2, Shield, Zap, Box, HelpCircle, Layers } from 'lucide-react';
+import {
+  Compass,
+  Eye,
+  MapPin,
+  Maximize2,
+  Minimize2,
+  Shield,
+  Zap,
+  Box,
+  HelpCircle,
+  Layers,
+  ChevronDown,
+  ChevronUp,
+} from 'lucide-react';
 import { roomNetwork } from '../engine/roomNetwork';
 import { RoomCategory, RoomDefinition } from '../types/game';
 
 interface MinimapProps {
   currentRoom: RoomDefinition;
+  discoveredRooms?: Set<string>;
   onSelectRoom?: (roomId: string) => void;
   className?: string;
 }
@@ -57,13 +71,19 @@ const CATEGORY_COLORS: Record<
   },
 };
 
-export const Minimap: React.FC<MinimapProps> = ({ currentRoom, onSelectRoom, className = '' }) => {
+export const Minimap: React.FC<MinimapProps> = ({
+  currentRoom,
+  discoveredRooms,
+  onSelectRoom,
+  className = '',
+}) => {
+  const [isCollapsed, setIsCollapsed] = useState<boolean>(false);
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
   const [hoveredRoomId, setHoveredRoomId] = useState<string | null>(null);
 
-  const discovered = roomNetwork.discoveredRooms;
+  const discovered = discoveredRooms || roomNetwork.discoveredRooms;
   const allRooms = roomNetwork.roomsState;
-  const totalRoomsCount = Object.keys(allRooms).length || 29;
+  const totalRoomsCount = Object.keys(allRooms).length || 53;
 
   // Station layout: Nexus Hub, Wings B & C, and Sectors 1-20
   const rows: { cat: RoomCategory; label: string; subLabel: string; roomIds: string[] }[] = [
@@ -142,29 +162,51 @@ export const Minimap: React.FC<MinimapProps> = ({ currentRoom, onSelectRoom, cla
     <div
       id="hud-station-minimap"
       className={`transition-all duration-300 pointer-events-auto bg-slate-950/90 backdrop-blur-md border border-cyan-900/60 rounded-xl shadow-2xl overflow-hidden font-mono ${
-        isExpanded ? 'w-[360px] sm:w-[440px]' : 'w-[200px] sm:w-[240px]'
+        isCollapsed
+          ? 'w-[200px] sm:w-[220px]'
+          : isExpanded
+          ? 'w-[360px] sm:w-[440px]'
+          : 'w-[200px] sm:w-[240px]'
       } ${className}`}
     >
       {/* Header Bar */}
-      <div className="flex items-center justify-between px-3 py-2 bg-slate-900/80 border-b border-cyan-900/40 text-xs">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between px-3 py-2 bg-slate-900/80 border-b border-cyan-900/40 text-xs select-none">
+        <button
+          type="button"
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="flex items-center gap-1.5 hover:opacity-80 transition-opacity cursor-pointer text-left"
+          title={isCollapsed ? 'Expand Radar (Click to open map)' : 'Minimize Radar'}
+        >
           <Compass className="w-3.5 h-3.5 text-cyan-400 animate-spin-slow" />
-          <span className="font-bold tracking-wider text-cyan-300">STATION RADAR</span>
-          <span className="text-[10px] text-slate-500">
+          <span className="font-bold tracking-wider text-cyan-300">RADAR</span>
+          <span className="text-[10px] text-slate-400 font-semibold">
             [{totalDiscovered}/{totalRoomsCount}]
           </span>
-        </div>
-        <button
-          onClick={() => setIsExpanded(!isExpanded)}
-          title={isExpanded ? 'Collapse Radar' : 'Expand Station Map'}
-          className="p-1 hover:bg-cyan-950/60 text-slate-400 hover:text-cyan-300 rounded transition-colors"
-        >
-          {isExpanded ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+          {isCollapsed ? (
+            <ChevronUp className="w-3.5 h-3.5 text-cyan-400 ml-1" />
+          ) : (
+            <ChevronDown className="w-3.5 h-3.5 text-slate-400 ml-1" />
+          )}
         </button>
+
+        <div className="flex items-center gap-1">
+          {!isCollapsed && (
+            <button
+              type="button"
+              onClick={() => setIsExpanded(!isExpanded)}
+              title={isExpanded ? 'Collapse Radar Grid' : 'Expand Station Map'}
+              className="p-1 hover:bg-cyan-950/60 text-slate-400 hover:text-cyan-300 rounded transition-colors"
+            >
+              {isExpanded ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+            </button>
+          )}
+        </div>
       </div>
 
-      {/* Grid Layout of Station Rooms */}
-      <div className="p-2.5 space-y-1.5 max-h-[360px] overflow-y-auto">
+      {!isCollapsed && (
+        <>
+          {/* Grid Layout of Station Rooms */}
+          <div className="p-2.5 space-y-1.5 max-h-[360px] overflow-y-auto">
         {rows.map((rowInfo) => {
           const gridColsClass = rowInfo.roomIds.length === 1 ? 'grid-cols-1' : rowInfo.roomIds.length > 4 ? (isExpanded ? 'grid-cols-7' : 'grid-cols-4') : 'grid-cols-4';
 
@@ -323,6 +365,8 @@ export const Minimap: React.FC<MinimapProps> = ({ currentRoom, onSelectRoom, cla
           <span className="text-emerald-400" title="Vertical">●</span>
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 };

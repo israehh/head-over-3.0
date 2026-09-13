@@ -6083,7 +6083,7 @@
         "west": "sector_00"
       },
       "defaultPlayerSpawn": {
-        "x": 7.5,
+        "x": 6.5,
         "y": 4.5,
         "z": 2,
         "direction": "W"
@@ -6331,7 +6331,9 @@
         }
       ],
       "drones": [],
-      "collectibles": [
+      "teleporters": [],
+      "elevators": [],
+      "items": [
         {
           "id": "col35_cell",
           "x": 9,
@@ -6342,9 +6344,7 @@
           "name": "Stacking Proving Cell",
           "description": "Recovered from observation deck."
         }
-      ],
-      "teleporters": [],
-      "elevators": []
+      ]
     },
     {
       "id": "sector_36",
@@ -6517,20 +6517,20 @@
           "direction": "E"
         }
       ],
-      "collectibles": [
+      "teleporters": [],
+      "elevators": [],
+      "items": [
         {
           "id": "col36_key",
           "x": 10,
           "y": 1,
           "z": 1,
-          "type": "keycard",
+          "type": "keycard_blue",
           "isCollected": false,
           "name": "Crucible Security Token",
           "description": "Unlocks restricted containment doors."
         }
-      ],
-      "teleporters": [],
-      "elevators": []
+      ]
     },
     {
       "id": "sector_37",
@@ -6704,20 +6704,21 @@
       ],
       "lasers": [],
       "drones": [],
-      "collectibles": [
+      "teleporters": [],
+      "elevators": [],
+      "items": [
         {
           "id": "col37_frag",
           "x": 8,
           "y": 10,
           "z": 2,
-          "type": "fragment",
+          "type": "nexus_fragment",
           "isCollected": false,
           "name": "Nexus Core Shard Theta",
-          "description": "Fragment of station core."
+          "description": "Fragment of station core.",
+          "fragmentId": 5
         }
-      ],
-      "teleporters": [],
-      "elevators": []
+      ]
     },
     {
       "id": "sector_38",
@@ -6876,7 +6877,9 @@
         }
       ],
       "drones": [],
-      "collectibles": [
+      "teleporters": [],
+      "elevators": [],
+      "items": [
         {
           "id": "col38_cell",
           "x": 1,
@@ -6887,9 +6890,7 @@
           "name": "Shielded Power Cell",
           "description": "Harvested behind optical barrier."
         }
-      ],
-      "teleporters": [],
-      "elevators": []
+      ]
     },
     {
       "id": "sector_39",
@@ -7078,7 +7079,9 @@
           "direction": "E"
         }
       ],
-      "collectibles": [
+      "teleporters": [],
+      "elevators": [],
+      "items": [
         {
           "id": "col39_cell",
           "x": 6,
@@ -7089,9 +7092,7 @@
           "name": "Mag-Lev Supercell",
           "description": "High density capacitor."
         }
-      ],
-      "teleporters": [],
-      "elevators": []
+      ]
     },
     {
       "id": "sector_40",
@@ -7245,7 +7246,9 @@
         }
       ],
       "drones": [],
-      "collectibles": [
+      "teleporters": [],
+      "elevators": [],
+      "items": [
         {
           "id": "col40_cell",
           "x": 10,
@@ -7256,9 +7259,7 @@
           "name": "Cryogenic Fuel Cell",
           "description": "Refrigerated cell."
         }
-      ],
-      "teleporters": [],
-      "elevators": []
+      ]
     },
     {
       "id": "sector_41",
@@ -7416,20 +7417,21 @@
         }
       ],
       "drones": [],
-      "collectibles": [
+      "teleporters": [],
+      "elevators": [],
+      "items": [
         {
           "id": "col41_frag",
           "x": 1,
           "y": 1,
           "z": 1,
-          "type": "fragment",
+          "type": "nexus_fragment",
           "isCollected": false,
           "name": "Nexus Fragment Iota",
-          "description": "Pneumatically sealed fragment."
+          "description": "Pneumatically sealed fragment.",
+          "fragmentId": 5
         }
-      ],
-      "teleporters": [],
-      "elevators": []
+      ]
     },
     {
       "id": "sector_42",
@@ -7615,7 +7617,9 @@
           "direction": "E"
         }
       ],
-      "collectibles": [
+      "teleporters": [],
+      "elevators": [],
+      "items": [
         {
           "id": "col42_cell",
           "x": 2,
@@ -7626,9 +7630,7 @@
           "name": "Gantry Supercell",
           "description": "High altitude power storage."
         }
-      ],
-      "teleporters": [],
-      "elevators": []
+      ]
     },
     {
       "id": "sector_43",
@@ -7836,7 +7838,9 @@
           "direction": "W"
         }
       ],
-      "collectibles": [
+      "teleporters": [],
+      "elevators": [],
+      "items": [
         {
           "id": "col43_cell",
           "x": 11,
@@ -7847,9 +7851,7 @@
           "name": "Deflection Crystal Cell",
           "description": "Power core with optical prism."
         }
-      ],
-      "teleporters": [],
-      "elevators": []
+      ]
     },
     {
       "id": "sector_44",
@@ -8085,20 +8087,21 @@
           "direction": "W"
         }
       ],
-      "collectibles": [
+      "teleporters": [],
+      "elevators": [],
+      "items": [
         {
           "id": "col44_frag",
           "x": 7,
           "y": 11,
           "z": 0,
-          "type": "fragment",
+          "type": "nexus_fragment",
           "isCollected": false,
           "name": "Grand Nexus Fragment Omega",
-          "description": "The grand prize of the Colosseum."
+          "description": "The grand prize of the Colosseum.",
+          "fragmentId": 5
         }
-      ],
-      "teleporters": [],
-      "elevators": []
+      ]
     },
     {
       "id": "sector_45",
@@ -8184,16 +8187,19 @@
       ],
       "lasers": [],
       "drones": [],
-      "collectibles": [
+      "teleporters": [],
+      "elevators": [],
+      "items": [
         {
           "id": "col45_frag",
           "x": 7,
           "y": 4,
           "z": 1,
-          "type": "fragment",
+          "type": "nexus_fragment",
           "isCollected": false,
           "name": "Nexus Fragment Epsilon",
-          "description": "Recovered from hidden maintenance nook."
+          "description": "Recovered from hidden maintenance nook.",
+          "fragmentId": 5
         },
         {
           "id": "col45_cell",
@@ -8205,9 +8211,7 @@
           "name": "Zenith Supercell",
           "description": "Overcharged station cell."
         }
-      ],
-      "teleporters": [],
-      "elevators": []
+      ]
     },
     {
       "id": "sector_46",
@@ -8301,16 +8305,19 @@
       ],
       "lasers": [],
       "drones": [],
-      "collectibles": [
+      "teleporters": [],
+      "elevators": [],
+      "items": [
         {
           "id": "col46_frag",
           "x": 8,
           "y": 8,
           "z": 1,
-          "type": "fragment",
+          "type": "nexus_fragment",
           "isCollected": false,
           "name": "Nexus Shard Zeta",
-          "description": "Preserved in sub-zero cryo freeze."
+          "description": "Preserved in sub-zero cryo freeze.",
+          "fragmentId": 5
         },
         {
           "id": "col46_cell",
@@ -8322,9 +8329,7 @@
           "name": "Cryo Supercell",
           "description": "High-density cryo battery."
         }
-      ],
-      "teleporters": [],
-      "elevators": []
+      ]
     },
     {
       "id": "sector_47",
@@ -8422,16 +8427,19 @@
       ],
       "lasers": [],
       "drones": [],
-      "collectibles": [
+      "teleporters": [],
+      "elevators": [],
+      "items": [
         {
           "id": "col47_frag",
           "x": 5,
           "y": 5,
           "z": 1,
-          "type": "fragment",
+          "type": "nexus_fragment",
           "isCollected": false,
           "name": "Nexus Core Shard Eta",
-          "description": "Foundry central processing shard."
+          "description": "Foundry central processing shard.",
+          "fragmentId": 5
         },
         {
           "id": "col47_cell",
@@ -8443,9 +8451,7 @@
           "name": "Heavy Pulse Cell",
           "description": "Sentinel power bank."
         }
-      ],
-      "teleporters": [],
-      "elevators": []
+      ]
     },
     {
       "id": "sector_48",
@@ -8533,7 +8539,9 @@
       ],
       "lasers": [],
       "drones": [],
-      "collectibles": [
+      "teleporters": [],
+      "elevators": [],
+      "items": [
         {
           "id": "col48_cell1",
           "x": 4,
@@ -8559,14 +8567,13 @@
           "x": 5,
           "y": 5,
           "z": 1,
-          "type": "fragment",
+          "type": "nexus_fragment",
           "isCollected": false,
           "name": "Nexus Shard Lambda",
-          "description": "Conductor core shard."
+          "description": "Conductor core shard.",
+          "fragmentId": 5
         }
-      ],
-      "teleporters": [],
-      "elevators": []
+      ]
     },
     {
       "id": "sector_49",
@@ -8639,16 +8646,19 @@
       ],
       "lasers": [],
       "drones": [],
-      "collectibles": [
+      "teleporters": [],
+      "elevators": [],
+      "items": [
         {
           "id": "col49_frag",
           "x": 6,
           "y": 6,
           "z": 1,
-          "type": "fragment",
+          "type": "nexus_fragment",
           "isCollected": false,
           "name": "Zenith Master Crest",
-          "description": "Golden station crest proving complete exploration."
+          "description": "Golden station crest proving complete exploration.",
+          "fragmentId": 5
         },
         {
           "id": "col49_cell",
@@ -8660,9 +8670,7 @@
           "name": "Overmind Zero Cell",
           "description": "Infinite-cycle energy battery."
         }
-      ],
-      "teleporters": [],
-      "elevators": []
+      ]
     },
     {
       "id": "sector_50",
@@ -8765,7 +8773,9 @@
       ],
       "lasers": [],
       "drones": [],
-      "collectibles": [
+      "teleporters": [],
+      "elevators": [],
+      "items": [
         {
           "id": "col50_cell",
           "x": 2,
@@ -8776,9 +8786,7 @@
           "name": "Express Line Battery",
           "description": "Shortcut maintenance power."
         }
-      ],
-      "teleporters": [],
-      "elevators": []
+      ]
     },
     {
       "id": "sector_51",
@@ -8881,7 +8889,9 @@
       ],
       "lasers": [],
       "drones": [],
-      "collectibles": [
+      "teleporters": [],
+      "elevators": [],
+      "items": [
         {
           "id": "col51_cell",
           "x": 7,
@@ -8892,9 +8902,7 @@
           "name": "Vent Sump Supercell",
           "description": "Clean bypass battery."
         }
-      ],
-      "teleporters": [],
-      "elevators": []
+      ]
     },
     {
       "id": "sector_52",
@@ -8986,7 +8994,9 @@
       ],
       "lasers": [],
       "drones": [],
-      "collectibles": [
+      "teleporters": [],
+      "elevators": [],
+      "items": [
         {
           "id": "col52_cell",
           "x": 2,
@@ -8997,9 +9007,7 @@
           "name": "Nexus Express Power Core",
           "description": "Master elevator supercell."
         }
-      ],
-      "teleporters": [],
-      "elevators": []
+      ]
     }
   ]
 }

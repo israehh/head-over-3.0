@@ -133,9 +133,10 @@ export default function App() {
       <RoomTransitionOverlay transition={engine.roomNetwork.transitionState} />
 
       {/* Interactive Minimap Radar */}
-      <div className="fixed bottom-3 right-3 z-30">
+      <div className="fixed bottom-24 sm:bottom-3 right-3 z-30">
         <Minimap
           currentRoom={engine.currentRoom}
+          discoveredRooms={engine.roomNetwork.discoveredRooms}
           onSelectRoom={(roomId) => {
             setPauseModalTab('map');
             engine.isPaused = true;
