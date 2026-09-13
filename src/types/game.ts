@@ -317,6 +317,7 @@ export interface RoomDefinition {
   teleporters: TeleporterPad[];
   elevators?: ElevatorPad[];
   movingElevators?: MovingElevator[];
+  doorOpenings?: { x: number; y: number }[];
   exitPortal?: ExitPortal;
   ambientColor: string;
   accentColor: string;

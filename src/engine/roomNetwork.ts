@@ -86,6 +86,7 @@ export function buildRoomsFromJson(): { [roomId: string]: RoomDefinition } {
       teleporters: JSON.parse(JSON.stringify(raw.teleporters || [])),
       elevators: JSON.parse(JSON.stringify(raw.elevators || [])),
       movingElevators: JSON.parse(JSON.stringify(raw.movingElevators || [])),
+      doorOpenings: raw.doorOpenings || [],
       exitPortal: raw.exitPortal ? JSON.parse(JSON.stringify(raw.exitPortal)) : undefined,
       ambientColor: raw.ambientColor || '#0a101f',
       accentColor: raw.accentColor || '#38bdf8',
@@ -173,33 +174,76 @@ export class RoomNetworkManager {
     const centerX = currentRoom.width / 2;
     const centerY = currentRoom.depth / 2;
 
-    const isAtNorthEdge = player.y <= MARGIN_EDGE && Math.abs(player.x - centerX) <= 2.8;
-    const isAtSouthEdge = player.y >= currentRoom.depth - MARGIN_EDGE && Math.abs(player.x - centerX) <= 2.8;
-    const isAtWestEdge = player.x <= MARGIN_EDGE && Math.abs(player.y - centerY) <= 2.8;
-    const isAtEastEdge = player.x >= currentRoom.width - MARGIN_EDGE && Math.abs(player.y - centerY) <= 2.8;
+    // Helper to check if player is at a designated opening or doorway along a given edge
+    const hasOpeningNear = (edge: 'N' | 'S' | 'E' | 'W', pCoord: number): boolean => {
+      // 1. Check explicit doorOpenings in room geometry
+      const openings = currentRoom.doorOpenings || [];
+      const edgeOpenings = openings.filter((o) => {
+        if (edge === 'N') return o.y === 0;
+        if (edge === 'S') return o.y === currentRoom.depth - 1;
+        if (edge === 'W') return o.x === 0;
+        if (edge === 'E') return o.x === currentRoom.width - 1;
+        return false;
+      });
+      if (edgeOpenings.length > 0) {
+        return edgeOpenings.some((o) => Math.abs((edge === 'N' || edge === 'S' ? o.x : o.y) - pCoord) <= 1.9);
+      }
+
+      // 2. Check doors placed on that perimeter edge
+      const doors = currentRoom.doors || [];
+      const edgeDoors = doors.filter((d) => {
+        if (edge === 'N') return d.orientation === 'EW' && d.y <= 1.5;
+        if (edge === 'S') return d.orientation === 'EW' && d.y >= currentRoom.depth - 2.5;
+        if (edge === 'W') return d.orientation === 'NS' && d.x <= 1.5;
+        if (edge === 'E') return d.orientation === 'NS' && d.x >= currentRoom.width - 2.5;
+        return false;
+      });
+      if (edgeDoors.length > 0) {
+        return edgeDoors.some((d) => Math.abs((edge === 'N' || edge === 'S' ? d.x : d.y) - pCoord) <= 1.9);
+      }
+
+      // 3. Standard fallback: within 2.8 of room center
+      return Math.abs(pCoord - (edge === 'N' || edge === 'S' ? centerX : centerY)) <= 2.8;
+    };
+
+    const isAtNorthEdge = player.y <= MARGIN_EDGE && hasOpeningNear('N', player.x);
+    const isAtSouthEdge = player.y >= currentRoom.depth - MARGIN_EDGE && hasOpeningNear('S', player.x);
+    const isAtWestEdge = player.x <= MARGIN_EDGE && hasOpeningNear('W', player.y);
+    const isAtEastEdge = player.x >= currentRoom.width - MARGIN_EDGE && hasOpeningNear('E', player.y);
 
     // 1. NORTH EXIT (moving North)
     if (isAtNorthEdge && exits.north && this.roomsState[exits.north]) {
       const targetRoom = this.roomsState[exits.north];
-      // Check if there is a door requiring keycard on North edge
-      const northDoor = currentRoom.doors.find((d) => d.orientation === 'EW' && d.y <= 1.0);
-      if (northDoor && !northDoor.isOpen && northDoor.requiredKeycard) {
-        if (!player.keycards.includes(northDoor.requiredKeycard)) {
-          onRestrictedNotice?.(`ACCESS LOCKED: Requires ${northDoor.requiredKeycard} Keycard`);
-          player.y = MARGIN_EDGE + 0.25; // bounce back slightly
+      const northDoor = currentRoom.doors.find((d) => d.orientation === 'EW' && d.y <= 1.5);
+      if (northDoor && !northDoor.isOpen) {
+        if (northDoor.requiredKeycard) {
+          if (!player.keycards.includes(northDoor.requiredKeycard)) {
+            onRestrictedNotice?.(`ACCESS LOCKED: Requires ${northDoor.requiredKeycard} Keycard`);
+            player.y = MARGIN_EDGE + 0.35;
+            return false;
+          } else {
+            northDoor.isOpen = true;
+          }
+        } else if (northDoor.requiredSwitchIds && northDoor.requiredSwitchIds.length > 0) {
+          onRestrictedNotice?.(`BULKHEAD LOCKED: Controlled by auxiliary switches.`);
+          player.y = MARGIN_EDGE + 0.35;
           return false;
         } else {
-          northDoor.isOpen = true;
+          onRestrictedNotice?.(`BULKHEAD CLOSED.`);
+          player.y = MARGIN_EDGE + 0.35;
+          return false;
         }
       }
 
-      // Preserve player X position relative to target room width
       const preservedX = Math.max(1.5, Math.min(targetRoom.width - 2.5, player.x));
-      const targetY = targetRoom.depth - 2.0; // Enter safely inside South side of target room
+      const targetY = targetRoom.depth - 2.0;
+      const targetElev = targetRoom.floorGrid[Math.floor(preservedX)]?.[Math.floor(targetY)]?.elevation || 0;
+
+      console.log(`[DIAG:TRANSITION] Compass NORTH: ${currentRoom.id} -> ${exits.north} at (${preservedX.toFixed(1)}, ${targetY.toFixed(1)}, ${targetElev.toFixed(1)})`);
 
       this.startTransition(
         exits.north,
-        { x: preservedX, y: targetY, z: 0 },
+        { x: preservedX, y: targetY, z: targetElev },
         'N',
         'N'
       );
@@ -209,24 +253,36 @@ export class RoomNetworkManager {
     // 2. SOUTH EXIT (moving South)
     if (isAtSouthEdge && exits.south && this.roomsState[exits.south]) {
       const targetRoom = this.roomsState[exits.south];
-      // Check keycard door on South edge
-      const southDoor = currentRoom.doors.find((d) => d.orientation === 'EW' && d.y >= currentRoom.depth - 2);
-      if (southDoor && !southDoor.isOpen && southDoor.requiredKeycard) {
-        if (!player.keycards.includes(southDoor.requiredKeycard)) {
-          onRestrictedNotice?.(`ACCESS LOCKED: Requires ${southDoor.requiredKeycard} Keycard`);
-          player.y = currentRoom.depth - MARGIN_EDGE - 0.25;
+      const southDoor = currentRoom.doors.find((d) => d.orientation === 'EW' && d.y >= currentRoom.depth - 2.5);
+      if (southDoor && !southDoor.isOpen) {
+        if (southDoor.requiredKeycard) {
+          if (!player.keycards.includes(southDoor.requiredKeycard)) {
+            onRestrictedNotice?.(`ACCESS LOCKED: Requires ${southDoor.requiredKeycard} Keycard`);
+            player.y = currentRoom.depth - MARGIN_EDGE - 0.35;
+            return false;
+          } else {
+            southDoor.isOpen = true;
+          }
+        } else if (southDoor.requiredSwitchIds && southDoor.requiredSwitchIds.length > 0) {
+          onRestrictedNotice?.(`BULKHEAD LOCKED: Controlled by auxiliary switches.`);
+          player.y = currentRoom.depth - MARGIN_EDGE - 0.35;
           return false;
         } else {
-          southDoor.isOpen = true;
+          onRestrictedNotice?.(`BULKHEAD CLOSED.`);
+          player.y = currentRoom.depth - MARGIN_EDGE - 0.35;
+          return false;
         }
       }
 
       const preservedX = Math.max(1.5, Math.min(targetRoom.width - 2.5, player.x));
-      const targetY = 2.0; // Enter safely inside North side of target room
+      const targetY = 2.0;
+      const targetElev = targetRoom.floorGrid[Math.floor(preservedX)]?.[Math.floor(targetY)]?.elevation || 0;
+
+      console.log(`[DIAG:TRANSITION] Compass SOUTH: ${currentRoom.id} -> ${exits.south} at (${preservedX.toFixed(1)}, ${targetY.toFixed(1)}, ${targetElev.toFixed(1)})`);
 
       this.startTransition(
         exits.south,
-        { x: preservedX, y: targetY, z: 0 },
+        { x: preservedX, y: targetY, z: targetElev },
         'S',
         'S'
       );
@@ -236,23 +292,36 @@ export class RoomNetworkManager {
     // 3. WEST EXIT (moving West)
     if (isAtWestEdge && exits.west && this.roomsState[exits.west]) {
       const targetRoom = this.roomsState[exits.west];
-      const westDoor = currentRoom.doors.find((d) => d.orientation === 'NS' && d.x <= 1.0);
-      if (westDoor && !westDoor.isOpen && westDoor.requiredKeycard) {
-        if (!player.keycards.includes(westDoor.requiredKeycard)) {
-          onRestrictedNotice?.(`ACCESS LOCKED: Requires ${westDoor.requiredKeycard} Keycard`);
-          player.x = MARGIN_EDGE + 0.25;
+      const westDoor = currentRoom.doors.find((d) => d.orientation === 'NS' && d.x <= 1.5);
+      if (westDoor && !westDoor.isOpen) {
+        if (westDoor.requiredKeycard) {
+          if (!player.keycards.includes(westDoor.requiredKeycard)) {
+            onRestrictedNotice?.(`ACCESS LOCKED: Requires ${westDoor.requiredKeycard} Keycard`);
+            player.x = MARGIN_EDGE + 0.35;
+            return false;
+          } else {
+            westDoor.isOpen = true;
+          }
+        } else if (westDoor.requiredSwitchIds && westDoor.requiredSwitchIds.length > 0) {
+          onRestrictedNotice?.(`BULKHEAD LOCKED: Controlled by auxiliary switches.`);
+          player.x = MARGIN_EDGE + 0.35;
           return false;
         } else {
-          westDoor.isOpen = true;
+          onRestrictedNotice?.(`BULKHEAD CLOSED.`);
+          player.x = MARGIN_EDGE + 0.35;
+          return false;
         }
       }
 
-      const targetX = targetRoom.width - 2.0; // Enter safely inside East side of target room
+      const targetX = targetRoom.width - 2.0;
       const preservedY = Math.max(1.5, Math.min(targetRoom.depth - 2.5, player.y));
+      const targetElev = targetRoom.floorGrid[Math.floor(targetX)]?.[Math.floor(preservedY)]?.elevation || 0;
+
+      console.log(`[DIAG:TRANSITION] Compass WEST: ${currentRoom.id} -> ${exits.west} at (${targetX.toFixed(1)}, ${preservedY.toFixed(1)}, ${targetElev.toFixed(1)})`);
 
       this.startTransition(
         exits.west,
-        { x: targetX, y: preservedY, z: 0 },
+        { x: targetX, y: preservedY, z: targetElev },
         'W',
         'W'
       );
@@ -262,14 +331,24 @@ export class RoomNetworkManager {
     // 4. EAST EXIT (moving East)
     if (isAtEastEdge && exits.east && this.roomsState[exits.east]) {
       const targetRoom = this.roomsState[exits.east];
-      const eastDoor = currentRoom.doors.find((d) => d.orientation === 'NS' && d.x >= currentRoom.width - 2);
-      if (eastDoor && !eastDoor.isOpen && eastDoor.requiredKeycard) {
-        if (!player.keycards.includes(eastDoor.requiredKeycard)) {
-          onRestrictedNotice?.(`ACCESS LOCKED: Requires ${eastDoor.requiredKeycard} Keycard`);
-          player.x = currentRoom.width - MARGIN_EDGE - 0.25;
+      const eastDoor = currentRoom.doors.find((d) => d.orientation === 'NS' && d.x >= currentRoom.width - 2.5);
+      if (eastDoor && !eastDoor.isOpen) {
+        if (eastDoor.requiredKeycard) {
+          if (!player.keycards.includes(eastDoor.requiredKeycard)) {
+            onRestrictedNotice?.(`ACCESS LOCKED: Requires ${eastDoor.requiredKeycard} Keycard`);
+            player.x = currentRoom.width - MARGIN_EDGE - 0.35;
+            return false;
+          } else {
+            eastDoor.isOpen = true;
+          }
+        } else if (eastDoor.requiredSwitchIds && eastDoor.requiredSwitchIds.length > 0) {
+          onRestrictedNotice?.(`BULKHEAD LOCKED: Controlled by auxiliary switches.`);
+          player.x = currentRoom.width - MARGIN_EDGE - 0.35;
           return false;
         } else {
-          eastDoor.isOpen = true;
+          onRestrictedNotice?.(`BULKHEAD CLOSED.`);
+          player.x = currentRoom.width - MARGIN_EDGE - 0.35;
+          return false;
         }
       }
 
@@ -278,17 +357,20 @@ export class RoomNetworkManager {
         const fragCount = player.nexusFragments?.length || 0;
         if (fragCount < 5) {
           onRestrictedNotice?.(`OVERMIND GATE LOCKED: All 5 Nexus Fragments Required (${fragCount}/5)`);
-          player.x = currentRoom.width - MARGIN_EDGE - 0.25;
+          player.x = currentRoom.width - MARGIN_EDGE - 0.35;
           return false;
         }
       }
 
-      const targetX = 2.0; // Enter safely inside West side of target room
+      const targetX = 2.0;
       const preservedY = Math.max(1.5, Math.min(targetRoom.depth - 2.5, player.y));
+      const targetElev = targetRoom.floorGrid[Math.floor(targetX)]?.[Math.floor(preservedY)]?.elevation || 0;
+
+      console.log(`[DIAG:TRANSITION] Compass EAST: ${currentRoom.id} -> ${exits.east} at (${targetX.toFixed(1)}, ${preservedY.toFixed(1)}, ${targetElev.toFixed(1)})`);
 
       this.startTransition(
         exits.east,
-        { x: targetX, y: preservedY, z: 0 },
+        { x: targetX, y: preservedY, z: targetElev },
         'E',
         'E'
       );
@@ -344,11 +426,10 @@ export class RoomNetworkManager {
     if (this.transitionTimer < halfTime) {
       // Phase 1: Wiping / Fading Out
       this.transitionState.phase = 'out';
-      this.transitionState.progress = this.transitionTimer / halfTime;
-    } else if (this.transitionTimer < this.transitionDuration) {
-      // Phase 2: Wiping / Fading In
+      this.transitionState.progress = Math.min(1, this.transitionTimer / halfTime);
+    } else {
+      // Phase 2: Ensure room swap is executed at or beyond halfTime
       if (this.transitionState.phase === 'out') {
-        // Swap room at peak obscurity
         const targetRoom = this.loadRoom(this.pendingTransition.targetRoomId);
         onPerformSwap(
           targetRoom,
@@ -357,13 +438,16 @@ export class RoomNetworkManager {
         );
         this.transitionState.phase = 'in';
       }
-      this.transitionState.progress = (this.transitionTimer - halfTime) / halfTime;
-    } else {
-      // Transition Complete
-      this.transitionState.active = false;
-      this.transitionState.phase = 'idle';
-      this.transitionState.progress = 0;
-      this.pendingTransition = null;
+
+      if (this.transitionTimer < this.transitionDuration) {
+        this.transitionState.progress = Math.min(1, (this.transitionTimer - halfTime) / halfTime);
+      } else {
+        // Transition Complete
+        this.transitionState.active = false;
+        this.transitionState.phase = 'idle';
+        this.transitionState.progress = 0;
+        this.pendingTransition = null;
+      }
     }
   }
 

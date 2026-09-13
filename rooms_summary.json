@@ -1,0 +1,2013 @@
+[
+  {
+    "id": "sector_01",
+    "name": "Cryo-Dock Awakening",
+    "items": [
+      {
+        "name": "Plasma Energy Cell",
+        "type": "energy_cell",
+        "id": "item01_cell",
+        "z": 1.2
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_02",
+        "isOpen": true,
+        "id": "door01_east"
+      },
+      {
+        "to": "sector_05",
+        "isOpen": true,
+        "id": "door01_south"
+      },
+      {
+        "to": "sector_00",
+        "isOpen": true,
+        "id": "door01_north"
+      }
+    ],
+    "exits": {
+      "north": "sector_00",
+      "south": "sector_05",
+      "east": "sector_02",
+      "west": null
+    },
+    "crates": 2,
+    "elevators": 0
+  },
+  {
+    "id": "sector_02",
+    "name": "Jump Calibration Bay",
+    "items": [
+      {
+        "name": "Blue Keycard",
+        "type": "keycard_blue",
+        "id": "item02_blue_key",
+        "z": 2.2
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_01",
+        "isOpen": true,
+        "id": "door02_west"
+      },
+      {
+        "to": "sector_03",
+        "isOpen": true,
+        "id": "door02_east"
+      },
+      {
+        "to": "sector_06",
+        "isOpen": true,
+        "id": "door02_south"
+      }
+    ],
+    "exits": {
+      "north": null,
+      "south": "sector_06",
+      "east": "sector_03",
+      "west": "sector_01"
+    },
+    "crates": 1,
+    "elevators": 0
+  },
+  {
+    "id": "sector_03",
+    "name": "Crate Logistics Lab",
+    "items": [
+      {
+        "name": "Nano Medkit",
+        "type": "medkit",
+        "id": "item03_medkit",
+        "z": 1.2
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_02",
+        "isOpen": true,
+        "id": "door03_west"
+      },
+      {
+        "to": "sector_04",
+        "reqKey": "BLUE",
+        "isOpen": false,
+        "id": "door03_east"
+      },
+      {
+        "to": "sector_07",
+        "isOpen": true,
+        "id": "door03_south"
+      },
+      {
+        "to": "sector_50",
+        "isOpen": true,
+        "id": "door03_north_shortcut"
+      }
+    ],
+    "exits": {
+      "north": "sector_50",
+      "south": "sector_07",
+      "east": "sector_04",
+      "west": "sector_02"
+    },
+    "crates": 4,
+    "elevators": 0
+  },
+  {
+    "id": "sector_04",
+    "name": "Apex Vault I: Cryo Matrix",
+    "items": [
+      {
+        "name": "Nexus Fragment I: Cryo Matrix",
+        "type": "nexus_fragment",
+        "id": "item04_frag1",
+        "z": 2.2
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_03",
+        "isOpen": true,
+        "id": "door04_west"
+      },
+      {
+        "to": "sector_08",
+        "isOpen": true,
+        "id": "door04_south"
+      }
+    ],
+    "exits": {
+      "north": null,
+      "south": "sector_08",
+      "east": null,
+      "west": "sector_03"
+    },
+    "crates": 1,
+    "elevators": 0
+  },
+  {
+    "id": "sector_05",
+    "name": "Dual Relay Chamber",
+    "items": [
+      {
+        "name": "Plasma Energy Cell",
+        "type": "energy_cell",
+        "id": "item05_cell",
+        "z": 0.2
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_01",
+        "isOpen": true,
+        "id": "door05_north"
+      },
+      {
+        "to": "sector_06",
+        "reqSwitch": [
+          "sw05_left",
+          "sw05_right"
+        ],
+        "isOpen": false,
+        "id": "door05_east"
+      },
+      {
+        "to": "sector_09",
+        "isOpen": true,
+        "id": "door05_south"
+      }
+    ],
+    "exits": {
+      "north": "sector_01",
+      "south": "sector_09",
+      "east": "sector_06",
+      "west": null
+    },
+    "crates": 2,
+    "elevators": 0
+  },
+  {
+    "id": "sector_06",
+    "name": "Stacking Stepper Pit",
+    "items": [
+      {
+        "name": "Nano Medkit",
+        "type": "medkit",
+        "id": "item06_medkit",
+        "z": 1.2
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_02",
+        "isOpen": true,
+        "id": "door06_north"
+      },
+      {
+        "to": "sector_05",
+        "isOpen": true,
+        "id": "door06_west"
+      },
+      {
+        "to": "sector_07",
+        "isOpen": true,
+        "id": "door06_east"
+      },
+      {
+        "to": "sector_10",
+        "reqSwitch": [
+          "sw06_bridge"
+        ],
+        "isOpen": false,
+        "id": "door06_south"
+      },
+      {
+        "to": "sector_51",
+        "isOpen": true,
+        "id": "door06_shortcut_51"
+      }
+    ],
+    "exits": {
+      "north": "sector_02",
+      "south": "sector_10",
+      "east": "sector_07",
+      "west": "sector_05"
+    },
+    "crates": 3,
+    "elevators": 0
+  },
+  {
+    "id": "sector_07",
+    "name": "Laser Synchronization Maze",
+    "items": [
+      {
+        "name": "Red Keycard",
+        "type": "keycard_red",
+        "id": "item07_red_key",
+        "z": 1.2
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_03",
+        "isOpen": true,
+        "id": "door07_north"
+      },
+      {
+        "to": "sector_06",
+        "isOpen": true,
+        "id": "door07_west"
+      },
+      {
+        "to": "sector_08",
+        "isOpen": true,
+        "id": "door07_east"
+      },
+      {
+        "to": "sector_11",
+        "isOpen": true,
+        "id": "door07_south"
+      }
+    ],
+    "exits": {
+      "north": "sector_03",
+      "south": "sector_11",
+      "east": "sector_08",
+      "west": "sector_06"
+    },
+    "crates": 2,
+    "elevators": 0
+  },
+  {
+    "id": "sector_08",
+    "name": "Quantum Inversion Matrix",
+    "items": [
+      {
+        "name": "Nexus Fragment II: Fusion Core",
+        "type": "nexus_fragment",
+        "id": "item08_frag2",
+        "z": 2.2
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_04",
+        "isOpen": true,
+        "id": "door08_north"
+      },
+      {
+        "to": "sector_07",
+        "isOpen": true,
+        "id": "door08_west"
+      },
+      {
+        "to": "sector_12",
+        "isOpen": true,
+        "id": "door08_south"
+      }
+    ],
+    "exits": {
+      "north": "sector_04",
+      "south": "sector_12",
+      "east": null,
+      "west": "sector_07"
+    },
+    "crates": 1,
+    "elevators": 1
+  },
+  {
+    "id": "sector_09",
+    "name": "Freight Receiving Dock",
+    "items": [
+      {
+        "name": "Plasma Energy Cell",
+        "type": "energy_cell",
+        "id": "item09_cell",
+        "z": 1.2
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_05",
+        "isOpen": true,
+        "id": "door09_north"
+      },
+      {
+        "to": "sector_10",
+        "isOpen": true,
+        "id": "door09_east"
+      },
+      {
+        "to": "sector_13",
+        "isOpen": true,
+        "id": "door09_south"
+      },
+      {
+        "to": "sector_50",
+        "isOpen": true,
+        "id": "door09_west_shortcut"
+      }
+    ],
+    "exits": {
+      "north": "sector_05",
+      "south": "sector_13",
+      "east": "sector_10",
+      "west": "sector_50"
+    },
+    "crates": 3,
+    "elevators": 1
+  },
+  {
+    "id": "sector_10",
+    "name": "Deep Cryo Warehouse",
+    "items": [
+      {
+        "name": "Nano Medkit",
+        "type": "medkit",
+        "id": "item10_medkit",
+        "z": 1.2
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_06",
+        "isOpen": true,
+        "id": "door10_north"
+      },
+      {
+        "to": "sector_09",
+        "isOpen": true,
+        "id": "door10_west"
+      },
+      {
+        "to": "sector_11",
+        "isOpen": true,
+        "id": "door10_east"
+      },
+      {
+        "to": "sector_14",
+        "isOpen": true,
+        "id": "door10_south"
+      },
+      {
+        "to": "sector_46",
+        "isOpen": true,
+        "id": "door10_secret_46"
+      }
+    ],
+    "exits": {
+      "north": "sector_06",
+      "south": "sector_14",
+      "east": "sector_11",
+      "west": "sector_09"
+    },
+    "crates": 2,
+    "elevators": 0
+  },
+  {
+    "id": "sector_11",
+    "name": "Hazardous Waste Sump",
+    "items": [
+      {
+        "name": "Plasma Energy Cell",
+        "type": "energy_cell",
+        "id": "item11_cell",
+        "z": 0.2
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_07",
+        "isOpen": true,
+        "id": "door11_north"
+      },
+      {
+        "to": "sector_10",
+        "isOpen": true,
+        "id": "door11_west"
+      },
+      {
+        "to": "sector_12",
+        "isOpen": true,
+        "id": "door11_east"
+      },
+      {
+        "to": "sector_15",
+        "reqSwitch": [
+          "sw11_sump"
+        ],
+        "isOpen": false,
+        "id": "door11_south"
+      }
+    ],
+    "exits": {
+      "north": "sector_07",
+      "south": "sector_15",
+      "east": "sector_12",
+      "west": "sector_10"
+    },
+    "crates": 1,
+    "elevators": 0
+  },
+  {
+    "id": "sector_12",
+    "name": "High-Value Vault III: AI Sub-Brain",
+    "items": [
+      {
+        "name": "Nexus Fragment III: Cybernetic Overmind",
+        "type": "nexus_fragment",
+        "id": "item12_frag3",
+        "z": 1.2
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_08",
+        "isOpen": true,
+        "id": "door12_north"
+      },
+      {
+        "to": "sector_11",
+        "isOpen": true,
+        "id": "door12_west"
+      },
+      {
+        "to": "sector_16",
+        "isOpen": true,
+        "id": "door12_south"
+      }
+    ],
+    "exits": {
+      "north": "sector_08",
+      "south": "sector_16",
+      "east": null,
+      "west": "sector_11"
+    },
+    "crates": 2,
+    "elevators": 0
+  },
+  {
+    "id": "sector_13",
+    "name": "Plasma Generator Hub",
+    "items": [
+      {
+        "name": "Plasma Energy Cell",
+        "type": "energy_cell",
+        "id": "item13_cell",
+        "z": 0.2
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_09",
+        "isOpen": true,
+        "id": "door13_north"
+      },
+      {
+        "to": "sector_14",
+        "isOpen": true,
+        "id": "door13_east"
+      },
+      {
+        "to": "sector_17",
+        "isOpen": true,
+        "id": "door13_south"
+      },
+      {
+        "to": "sector_51",
+        "isOpen": true,
+        "id": "door13_west_shortcut"
+      }
+    ],
+    "exits": {
+      "north": "sector_09",
+      "south": "sector_17",
+      "east": "sector_14",
+      "west": "sector_51"
+    },
+    "crates": 1,
+    "elevators": 0
+  },
+  {
+    "id": "sector_14",
+    "name": "High Voltage Transformer",
+    "items": [
+      {
+        "name": "Nano Medkit",
+        "type": "medkit",
+        "id": "item14_medkit",
+        "z": 0.2
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_10",
+        "isOpen": true,
+        "id": "door14_north"
+      },
+      {
+        "to": "sector_13",
+        "isOpen": true,
+        "id": "door14_west"
+      },
+      {
+        "to": "sector_15",
+        "isOpen": true,
+        "id": "door14_east"
+      },
+      {
+        "to": "sector_18",
+        "isOpen": true,
+        "id": "door14_south"
+      }
+    ],
+    "exits": {
+      "north": "sector_10",
+      "south": "sector_18",
+      "east": "sector_15",
+      "west": "sector_13"
+    },
+    "crates": 2,
+    "elevators": 0
+  },
+  {
+    "id": "sector_15",
+    "name": "Supercharger Sub-Station",
+    "items": [
+      {
+        "name": "Green Keycard",
+        "type": "keycard_green",
+        "id": "item15_green_key",
+        "z": 1.2
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_11",
+        "isOpen": true,
+        "id": "door15_north"
+      },
+      {
+        "to": "sector_14",
+        "isOpen": true,
+        "id": "door15_west"
+      },
+      {
+        "to": "sector_16",
+        "isOpen": true,
+        "id": "door15_east"
+      },
+      {
+        "to": "sector_19",
+        "reqKey": "RED",
+        "isOpen": false,
+        "id": "door15_south"
+      }
+    ],
+    "exits": {
+      "north": "sector_11",
+      "south": "sector_19",
+      "east": "sector_16",
+      "west": "sector_14"
+    },
+    "crates": 2,
+    "elevators": 0
+  },
+  {
+    "id": "sector_16",
+    "name": "Reactor Core Apex",
+    "items": [
+      {
+        "name": "Nexus Fragment IV: Graviton Dynamo",
+        "type": "nexus_fragment",
+        "id": "item16_frag4",
+        "z": 1.2
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_12",
+        "isOpen": true,
+        "id": "door16_north"
+      },
+      {
+        "to": "sector_15",
+        "isOpen": true,
+        "id": "door16_west"
+      },
+      {
+        "to": "sector_20",
+        "isOpen": true,
+        "id": "door16_south"
+      }
+    ],
+    "exits": {
+      "north": "sector_12",
+      "south": "sector_20",
+      "east": null,
+      "west": "sector_15"
+    },
+    "crates": 2,
+    "elevators": 0
+  },
+  {
+    "id": "sector_17",
+    "name": "Drone Sentinel Perimeter",
+    "items": [
+      {
+        "name": "Plasma Energy Cell",
+        "type": "energy_cell",
+        "id": "item17_cell",
+        "z": 1.2
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_13",
+        "isOpen": true,
+        "id": "door17_north"
+      },
+      {
+        "to": "sector_18",
+        "isOpen": true,
+        "id": "door17_east"
+      },
+      {
+        "to": "sector_52",
+        "isOpen": true,
+        "id": "door17_south_shortcut"
+      }
+    ],
+    "exits": {
+      "north": "sector_13",
+      "south": "sector_52",
+      "east": "sector_18",
+      "west": null
+    },
+    "crates": 2,
+    "elevators": 0
+  },
+  {
+    "id": "sector_18",
+    "name": "Interceptor Bastion",
+    "items": [
+      {
+        "name": "Nano Medkit",
+        "type": "medkit",
+        "id": "item18_medkit",
+        "z": 0.2
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_14",
+        "isOpen": true,
+        "id": "door18_north"
+      },
+      {
+        "to": "sector_17",
+        "isOpen": true,
+        "id": "door18_west"
+      },
+      {
+        "to": "sector_19",
+        "reqSwitch": [
+          "sw18_a",
+          "sw18_b"
+        ],
+        "isOpen": false,
+        "id": "door18_east"
+      },
+      {
+        "to": "sector_47",
+        "isOpen": true,
+        "id": "door18_secret_47"
+      }
+    ],
+    "exits": {
+      "north": "sector_14",
+      "south": null,
+      "east": "sector_19",
+      "west": "sector_17"
+    },
+    "crates": 2,
+    "elevators": 0
+  },
+  {
+    "id": "sector_19",
+    "name": "Master Access Antechamber",
+    "items": [
+      {
+        "name": "Nexus Fragment V: Chrono Resonance",
+        "type": "nexus_fragment",
+        "id": "item19_frag5",
+        "z": 1.2
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_15",
+        "isOpen": true,
+        "id": "door19_north"
+      },
+      {
+        "to": "sector_18",
+        "isOpen": true,
+        "id": "door19_west"
+      },
+      {
+        "to": "sector_20",
+        "reqKey": "GREEN",
+        "isOpen": false,
+        "id": "door19_east"
+      }
+    ],
+    "exits": {
+      "north": "sector_15",
+      "south": null,
+      "east": "sector_20",
+      "west": "sector_18"
+    },
+    "crates": 1,
+    "elevators": 0
+  },
+  {
+    "id": "sector_20",
+    "name": "Overmind Sanctum Core",
+    "items": [],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_16",
+        "isOpen": true,
+        "id": "door20_north"
+      },
+      {
+        "to": "sector_19",
+        "isOpen": true,
+        "id": "door20_west"
+      }
+    ],
+    "exits": {
+      "north": "sector_16",
+      "south": null,
+      "east": null,
+      "west": "sector_19"
+    },
+    "crates": 2,
+    "elevators": 0
+  },
+  {
+    "id": "sector_00",
+    "name": "Orbital Transit Grand Nexus",
+    "items": [
+      {
+        "name": "Nexus High-Output Cell",
+        "type": "energy_cell",
+        "id": "item00_cell",
+        "z": 2.2
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_01",
+        "isOpen": true,
+        "id": "door00_south"
+      },
+      {
+        "to": "sector_21",
+        "isOpen": true,
+        "id": "door00_west"
+      },
+      {
+        "to": "sector_28",
+        "isOpen": true,
+        "id": "door00_east"
+      },
+      {
+        "to": "sector_27",
+        "isOpen": true,
+        "id": "door00_shortcut_b"
+      },
+      {
+        "to": "sector_34",
+        "isOpen": true,
+        "id": "door00_shortcut_c"
+      },
+      {
+        "to": "sector_52",
+        "isOpen": true,
+        "id": "door00_southwest_shortcut_52"
+      }
+    ],
+    "exits": {
+      "north": null,
+      "south": "sector_01",
+      "east": "sector_28",
+      "west": "sector_21"
+    },
+    "crates": 2,
+    "elevators": 2
+  },
+  {
+    "id": "sector_21",
+    "name": "Cargo Intake & Weigh Station",
+    "items": [
+      {
+        "name": "Freight Battery Unit",
+        "type": "energy_cell",
+        "id": "item21_cell",
+        "z": 0
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_00",
+        "isOpen": true,
+        "id": "door21_east"
+      },
+      {
+        "to": "sector_22",
+        "isOpen": true,
+        "id": "door21_north"
+      },
+      {
+        "to": "sector_23",
+        "isOpen": true,
+        "id": "door21_west"
+      }
+    ],
+    "exits": {
+      "north": "sector_22",
+      "south": null,
+      "east": "sector_00",
+      "west": "sector_23"
+    },
+    "crates": 2,
+    "elevators": 0
+  },
+  {
+    "id": "sector_22",
+    "name": "Hydraulic Lift Shaft",
+    "items": [
+      {
+        "name": "Gantry Capacitor",
+        "type": "energy_cell",
+        "id": "item22_cell",
+        "z": 2.7
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_21",
+        "isOpen": true,
+        "id": "door22_south"
+      },
+      {
+        "to": "sector_24",
+        "isOpen": true,
+        "id": "door22_north"
+      }
+    ],
+    "exits": {
+      "north": "sector_24",
+      "south": "sector_21",
+      "east": null,
+      "west": null
+    },
+    "crates": 1,
+    "elevators": 1
+  },
+  {
+    "id": "sector_23",
+    "name": "Sub-Zero Stacking Bay",
+    "items": [
+      {
+        "name": "Cryo-Medkit",
+        "type": "medkit",
+        "id": "item23_medkit",
+        "z": 0
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_21",
+        "isOpen": true,
+        "id": "door23_east"
+      },
+      {
+        "to": "sector_24",
+        "isOpen": true,
+        "id": "door23_north"
+      },
+      {
+        "to": "sector_35",
+        "isOpen": true,
+        "id": "door23_south_to_35"
+      }
+    ],
+    "exits": {
+      "north": "sector_24",
+      "south": "sector_35",
+      "east": "sector_21",
+      "west": null
+    },
+    "crates": 2,
+    "elevators": 0
+  },
+  {
+    "id": "sector_24",
+    "name": "Container Crane Gantry",
+    "items": [
+      {
+        "name": "Crane Servo Cell",
+        "type": "energy_cell",
+        "id": "item24_cell",
+        "z": 2.2
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_22",
+        "isOpen": true,
+        "id": "door24_south"
+      },
+      {
+        "to": "sector_23",
+        "isOpen": true,
+        "id": "door24_west"
+      },
+      {
+        "to": "sector_25",
+        "isOpen": true,
+        "id": "door24_north"
+      },
+      {
+        "to": "sector_27",
+        "isOpen": true,
+        "id": "door24_east"
+      },
+      {
+        "to": "sector_26",
+        "isOpen": true,
+        "id": "door24_secret"
+      }
+    ],
+    "exits": {
+      "north": "sector_25",
+      "south": "sector_22",
+      "east": "sector_27",
+      "west": "sector_23"
+    },
+    "crates": 2,
+    "elevators": 0
+  },
+  {
+    "id": "sector_25",
+    "name": "Cryo-Storage Apex Vault",
+    "items": [
+      {
+        "name": "Nexus Fragment I: Cryo-Stasis Shard",
+        "type": "nexus_fragment",
+        "id": "item25_fragment",
+        "z": 2.2
+      },
+      {
+        "name": "Cryo Medkit",
+        "type": "medkit",
+        "id": "item25_medkit",
+        "z": 0
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_24",
+        "isOpen": true,
+        "id": "door25_south"
+      }
+    ],
+    "exits": {
+      "north": null,
+      "south": "sector_24",
+      "east": null,
+      "west": null
+    },
+    "crates": 2,
+    "elevators": 0
+  },
+  {
+    "id": "sector_26",
+    "name": "Sub-Deck Maintenance Vent (SECRET)",
+    "items": [
+      {
+        "name": "Cryo-Engineering Blue Keycard",
+        "type": "keycard_blue",
+        "id": "item26_blue_card",
+        "z": 0.8
+      },
+      {
+        "name": "Auxiliary Supercell",
+        "type": "energy_cell",
+        "id": "item26_cell1",
+        "z": 0
+      },
+      {
+        "name": "Auxiliary Supercell",
+        "type": "energy_cell",
+        "id": "item26_cell2",
+        "z": 0
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_24",
+        "isOpen": true,
+        "id": "door26_north"
+      }
+    ],
+    "exits": {
+      "north": "sector_24",
+      "south": null,
+      "east": null,
+      "west": null
+    },
+    "crates": 1,
+    "elevators": 0
+  },
+  {
+    "id": "sector_27",
+    "name": "Cargo Chute Bypass (SHORTCUT)",
+    "items": [
+      {
+        "name": "Chute Pressure Cell",
+        "type": "energy_cell",
+        "id": "item27_cell",
+        "z": 2.2
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_24",
+        "isOpen": true,
+        "id": "door27_west"
+      },
+      {
+        "to": "sector_00",
+        "isOpen": true,
+        "id": "door27_east"
+      }
+    ],
+    "exits": {
+      "north": null,
+      "south": null,
+      "east": "sector_00",
+      "west": "sector_24"
+    },
+    "crates": 0,
+    "elevators": 0
+  },
+  {
+    "id": "sector_28",
+    "name": "Plasma Distribution Junction",
+    "items": [
+      {
+        "name": "Plasma Shunt Cell",
+        "type": "energy_cell",
+        "id": "item28_cell",
+        "z": 0
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_00",
+        "isOpen": true,
+        "id": "door28_west"
+      },
+      {
+        "to": "sector_29",
+        "isOpen": true,
+        "id": "door28_north"
+      },
+      {
+        "to": "sector_30",
+        "isOpen": true,
+        "id": "door28_east"
+      }
+    ],
+    "exits": {
+      "north": "sector_29",
+      "south": null,
+      "east": "sector_30",
+      "west": "sector_00"
+    },
+    "crates": 2,
+    "elevators": 0
+  },
+  {
+    "id": "sector_29",
+    "name": "High Voltage Stepping Conduits",
+    "items": [
+      {
+        "name": "Reactor Coupler Cell",
+        "type": "energy_cell",
+        "id": "item29_cell",
+        "z": 2.2
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_28",
+        "isOpen": true,
+        "id": "door29_south"
+      },
+      {
+        "to": "sector_31",
+        "isOpen": true,
+        "id": "door29_north"
+      },
+      {
+        "to": "sector_48",
+        "isOpen": true,
+        "id": "door29_secret_48"
+      }
+    ],
+    "exits": {
+      "north": "sector_31",
+      "south": "sector_28",
+      "east": null,
+      "west": null
+    },
+    "crates": 1,
+    "elevators": 0
+  },
+  {
+    "id": "sector_30",
+    "name": "Laser Reflection Relay Chamber",
+    "items": [
+      {
+        "name": "Radiation Burn Kit",
+        "type": "medkit",
+        "id": "item30_medkit",
+        "z": 0
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_28",
+        "isOpen": true,
+        "id": "door30_west"
+      },
+      {
+        "to": "sector_31",
+        "isOpen": true,
+        "id": "door30_north"
+      }
+    ],
+    "exits": {
+      "north": "sector_31",
+      "south": null,
+      "east": null,
+      "west": "sector_28"
+    },
+    "crates": 2,
+    "elevators": 0
+  },
+  {
+    "id": "sector_31",
+    "name": "Electromagnetic Elevator Core",
+    "items": [
+      {
+        "name": "Tachyon Cell",
+        "type": "energy_cell",
+        "id": "item31_cell",
+        "z": 0
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_29",
+        "isOpen": true,
+        "id": "door31_south"
+      },
+      {
+        "to": "sector_30",
+        "isOpen": true,
+        "id": "door31_east"
+      },
+      {
+        "to": "sector_32",
+        "isOpen": true,
+        "id": "door31_north"
+      },
+      {
+        "to": "sector_34",
+        "isOpen": true,
+        "id": "door31_west"
+      },
+      {
+        "to": "sector_33",
+        "isOpen": true,
+        "id": "door31_secret"
+      }
+    ],
+    "exits": {
+      "north": "sector_32",
+      "south": "sector_29",
+      "east": "sector_30",
+      "west": "sector_34"
+    },
+    "crates": 1,
+    "elevators": 2
+  },
+  {
+    "id": "sector_32",
+    "name": "The Reactor Core Heart",
+    "items": [
+      {
+        "name": "Nexus Fragment II: Fusion Core Torus",
+        "type": "nexus_fragment",
+        "id": "item32_fragment",
+        "z": 2.8
+      },
+      {
+        "name": "Reactor Supercell",
+        "type": "energy_cell",
+        "id": "item32_cell",
+        "z": 0
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_31",
+        "isOpen": true,
+        "id": "door32_south"
+      }
+    ],
+    "exits": {
+      "north": null,
+      "south": "sector_31",
+      "east": null,
+      "west": null
+    },
+    "crates": 2,
+    "elevators": 0
+  },
+  {
+    "id": "sector_33",
+    "name": "Overcharged Capacitor Cache (SECRET)",
+    "items": [
+      {
+        "name": "Reactor Authorization Red Keycard",
+        "type": "keycard_red",
+        "id": "item33_red_card",
+        "z": 0.8
+      },
+      {
+        "name": "Tachyon Hypercell",
+        "type": "energy_cell",
+        "id": "item33_cell1",
+        "z": 0
+      },
+      {
+        "name": "Tachyon Hypercell",
+        "type": "energy_cell",
+        "id": "item33_cell2",
+        "z": 0
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_31",
+        "isOpen": true,
+        "id": "door33_north"
+      }
+    ],
+    "exits": {
+      "north": "sector_31",
+      "south": null,
+      "east": null,
+      "west": null
+    },
+    "crates": 1,
+    "elevators": 0
+  },
+  {
+    "id": "sector_34",
+    "name": "High-Energy Service Conduit (SHORTCUT)",
+    "items": [
+      {
+        "name": "Conduit Power Cell",
+        "type": "energy_cell",
+        "id": "item34_cell",
+        "z": 2.2
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_31",
+        "isOpen": true,
+        "id": "door34_east"
+      },
+      {
+        "to": "sector_00",
+        "isOpen": true,
+        "id": "door34_west"
+      }
+    ],
+    "exits": {
+      "north": null,
+      "south": null,
+      "east": "sector_31",
+      "west": "sector_00"
+    },
+    "crates": 0,
+    "elevators": 0
+  },
+  {
+    "id": "sector_35",
+    "name": "Cargo Stacking Testing Facility",
+    "items": [
+      {
+        "name": "Stacking Proving Cell",
+        "type": "energy_cell",
+        "id": "col35_cell",
+        "z": 2
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_23",
+        "isOpen": true,
+        "id": "door35_north"
+      },
+      {
+        "to": "sector_36",
+        "isOpen": false,
+        "id": "door35_south"
+      }
+    ],
+    "exits": {
+      "north": "sector_23",
+      "south": "sector_36",
+      "east": null,
+      "west": null
+    },
+    "crates": 3,
+    "elevators": 0
+  },
+  {
+    "id": "sector_36",
+    "name": "Dual-Mass Hydraulic Crucible",
+    "items": [
+      {
+        "name": "Crucible Security Token",
+        "type": "keycard_blue",
+        "id": "col36_key",
+        "z": 1
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_35",
+        "isOpen": true,
+        "id": "door36_north"
+      },
+      {
+        "to": "sector_37",
+        "isOpen": false,
+        "id": "door36_south"
+      }
+    ],
+    "exits": {
+      "north": "sector_35",
+      "south": "sector_37",
+      "east": null,
+      "west": null
+    },
+    "crates": 4,
+    "elevators": 0
+  },
+  {
+    "id": "sector_37",
+    "name": "High-Bay Vertical Stepper",
+    "items": [
+      {
+        "name": "Nexus Core Shard Theta",
+        "type": "nexus_fragment",
+        "id": "col37_frag",
+        "z": 2
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_36",
+        "isOpen": true,
+        "id": "door37_north"
+      },
+      {
+        "to": "sector_38",
+        "isOpen": true,
+        "id": "door37_south"
+      },
+      {
+        "to": "sector_45",
+        "isOpen": true,
+        "id": "door37_secret_45"
+      }
+    ],
+    "exits": {
+      "north": "sector_36",
+      "south": "sector_38",
+      "east": "sector_45",
+      "west": null
+    },
+    "crates": 4,
+    "elevators": 0
+  },
+  {
+    "id": "sector_38",
+    "name": "Laser Interception Gantry",
+    "items": [
+      {
+        "name": "Shielded Power Cell",
+        "type": "energy_cell",
+        "id": "col38_cell",
+        "z": 0
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_37",
+        "isOpen": true,
+        "id": "door38_north"
+      },
+      {
+        "to": "sector_39",
+        "isOpen": true,
+        "id": "door38_south"
+      }
+    ],
+    "exits": {
+      "north": "sector_37",
+      "south": "sector_39",
+      "east": null,
+      "west": null
+    },
+    "crates": 4,
+    "elevators": 0
+  },
+  {
+    "id": "sector_39",
+    "name": "Magnetic Freight Balancer",
+    "items": [
+      {
+        "name": "Mag-Lev Supercell",
+        "type": "energy_cell",
+        "id": "col39_cell",
+        "z": 0
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_38",
+        "isOpen": true,
+        "id": "door39_north"
+      },
+      {
+        "to": "sector_40",
+        "isOpen": false,
+        "id": "door39_south"
+      }
+    ],
+    "exits": {
+      "north": "sector_38",
+      "south": "sector_40",
+      "east": null,
+      "west": null
+    },
+    "crates": 5,
+    "elevators": 0
+  },
+  {
+    "id": "sector_40",
+    "name": "Cryo-Crate Logistics Sorter",
+    "items": [
+      {
+        "name": "Cryogenic Fuel Cell",
+        "type": "energy_cell",
+        "id": "col40_cell",
+        "z": 0
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_39",
+        "isOpen": true,
+        "id": "door40_north"
+      },
+      {
+        "to": "sector_41",
+        "isOpen": false,
+        "id": "door40_south"
+      }
+    ],
+    "exits": {
+      "north": "sector_39",
+      "south": "sector_41",
+      "east": null,
+      "west": null
+    },
+    "crates": 4,
+    "elevators": 0
+  },
+  {
+    "id": "sector_41",
+    "name": "Pneumatic Column Press",
+    "items": [
+      {
+        "name": "Nexus Fragment Iota",
+        "type": "nexus_fragment",
+        "id": "col41_frag",
+        "z": 1
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_40",
+        "isOpen": true,
+        "id": "door41_north"
+      },
+      {
+        "to": "sector_42",
+        "isOpen": false,
+        "id": "door41_south"
+      }
+    ],
+    "exits": {
+      "north": "sector_40",
+      "south": "sector_42",
+      "east": null,
+      "west": null
+    },
+    "crates": 5,
+    "elevators": 0
+  },
+  {
+    "id": "sector_42",
+    "name": "Overhead Concourse Mezzanine",
+    "items": [
+      {
+        "name": "Gantry Supercell",
+        "type": "energy_cell",
+        "id": "col42_cell",
+        "z": 2
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_41",
+        "isOpen": true,
+        "id": "door42_north"
+      },
+      {
+        "to": "sector_43",
+        "isOpen": true,
+        "id": "door42_south"
+      }
+    ],
+    "exits": {
+      "north": "sector_41",
+      "south": "sector_43",
+      "east": null,
+      "west": null
+    },
+    "crates": 4,
+    "elevators": 0
+  },
+  {
+    "id": "sector_43",
+    "name": "Dual-Beam Deflection Vault",
+    "items": [
+      {
+        "name": "Deflection Crystal Cell",
+        "type": "energy_cell",
+        "id": "col43_cell",
+        "z": 0
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_42",
+        "isOpen": true,
+        "id": "door43_north"
+      },
+      {
+        "to": "sector_44",
+        "isOpen": false,
+        "id": "door43_south"
+      }
+    ],
+    "exits": {
+      "north": "sector_42",
+      "south": "sector_44",
+      "east": null,
+      "west": null
+    },
+    "crates": 4,
+    "elevators": 0
+  },
+  {
+    "id": "sector_44",
+    "name": "Apex Stacking Colosseum",
+    "items": [
+      {
+        "name": "Grand Nexus Fragment Omega",
+        "type": "nexus_fragment",
+        "id": "col44_frag",
+        "z": 0
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_43",
+        "isOpen": true,
+        "id": "door44_north"
+      },
+      {
+        "to": "sector_49",
+        "isOpen": true,
+        "id": "door44_east_secret"
+      }
+    ],
+    "exits": {
+      "north": "sector_43",
+      "south": null,
+      "east": "sector_49",
+      "west": null
+    },
+    "crates": 6,
+    "elevators": 0
+  },
+  {
+    "id": "sector_45",
+    "name": "Sub-Vault Maintenance Nook (SECRET)",
+    "items": [
+      {
+        "name": "Nexus Fragment Epsilon",
+        "type": "nexus_fragment",
+        "id": "col45_frag",
+        "z": 1
+      },
+      {
+        "name": "Zenith Supercell",
+        "type": "energy_cell",
+        "id": "col45_cell",
+        "z": 0
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_37",
+        "isOpen": true,
+        "id": "door45_west"
+      }
+    ],
+    "exits": {
+      "north": null,
+      "south": null,
+      "east": null,
+      "west": "sector_37"
+    },
+    "crates": 1,
+    "elevators": 0
+  },
+  {
+    "id": "sector_46",
+    "name": "Cryo-Depot Hidden Catacomb (SECRET)",
+    "items": [
+      {
+        "name": "Nexus Shard Zeta",
+        "type": "nexus_fragment",
+        "id": "col46_frag",
+        "z": 1
+      },
+      {
+        "name": "Cryo Supercell",
+        "type": "energy_cell",
+        "id": "col46_cell",
+        "z": 0
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_10",
+        "isOpen": true,
+        "id": "door46_west"
+      }
+    ],
+    "exits": {
+      "north": null,
+      "south": null,
+      "east": null,
+      "west": "sector_10"
+    },
+    "crates": 2,
+    "elevators": 0
+  },
+  {
+    "id": "sector_47",
+    "name": "Decommissioned Drone Foundry (SECRET)",
+    "items": [
+      {
+        "name": "Nexus Core Shard Eta",
+        "type": "nexus_fragment",
+        "id": "col47_frag",
+        "z": 1
+      },
+      {
+        "name": "Heavy Pulse Cell",
+        "type": "energy_cell",
+        "id": "col47_cell",
+        "z": 0
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_18",
+        "isOpen": true,
+        "id": "door47_north"
+      }
+    ],
+    "exits": {
+      "north": "sector_18",
+      "south": null,
+      "east": null,
+      "west": null
+    },
+    "crates": 2,
+    "elevators": 0
+  },
+  {
+    "id": "sector_48",
+    "name": "Plasma Conductor Void (SECRET)",
+    "items": [
+      {
+        "name": "Plasma Supercell Alpha",
+        "type": "energy_cell",
+        "id": "col48_cell1",
+        "z": 1
+      },
+      {
+        "name": "Plasma Supercell Beta",
+        "type": "energy_cell",
+        "id": "col48_cell2",
+        "z": 2
+      },
+      {
+        "name": "Nexus Shard Lambda",
+        "type": "nexus_fragment",
+        "id": "col48_frag",
+        "z": 1
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_29",
+        "isOpen": true,
+        "id": "door48_west"
+      }
+    ],
+    "exits": {
+      "north": null,
+      "south": null,
+      "east": null,
+      "west": "sector_29"
+    },
+    "crates": 2,
+    "elevators": 0
+  },
+  {
+    "id": "sector_49",
+    "name": "Archival Vault Zero (SECRET)",
+    "items": [
+      {
+        "name": "Zenith Master Crest",
+        "type": "nexus_fragment",
+        "id": "col49_frag",
+        "z": 1
+      },
+      {
+        "name": "Overmind Zero Cell",
+        "type": "energy_cell",
+        "id": "col49_cell",
+        "z": 0
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_44",
+        "isOpen": true,
+        "id": "door49_west"
+      }
+    ],
+    "exits": {
+      "north": null,
+      "south": null,
+      "east": null,
+      "west": "sector_44"
+    },
+    "crates": 0,
+    "elevators": 0
+  },
+  {
+    "id": "sector_50",
+    "name": "High-Catwalk Express (SHORTCUT)",
+    "items": [
+      {
+        "name": "Express Line Battery",
+        "type": "energy_cell",
+        "id": "col50_cell",
+        "z": 0
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_03",
+        "isOpen": true,
+        "id": "door50_south"
+      },
+      {
+        "to": "sector_09",
+        "isOpen": true,
+        "id": "door50_east"
+      }
+    ],
+    "exits": {
+      "north": null,
+      "south": "sector_03",
+      "east": "sector_09",
+      "west": null
+    },
+    "crates": 1,
+    "elevators": 0
+  },
+  {
+    "id": "sector_51",
+    "name": "Ventilation Bypass (SHORTCUT)",
+    "items": [
+      {
+        "name": "Vent Sump Supercell",
+        "type": "energy_cell",
+        "id": "col51_cell",
+        "z": 0
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_06",
+        "isOpen": true,
+        "id": "door51_east"
+      },
+      {
+        "to": "sector_13",
+        "isOpen": true,
+        "id": "door51_west"
+      }
+    ],
+    "exits": {
+      "north": null,
+      "south": null,
+      "east": "sector_06",
+      "west": "sector_13"
+    },
+    "crates": 1,
+    "elevators": 0
+  },
+  {
+    "id": "sector_52",
+    "name": "Service Elevator Maintenance (SHORTCUT)",
+    "items": [
+      {
+        "name": "Nexus Express Power Core",
+        "type": "energy_cell",
+        "id": "col52_cell",
+        "z": 0
+      }
+    ],
+    "puzzles": [],
+    "doors": [
+      {
+        "to": "sector_17",
+        "isOpen": true,
+        "id": "door52_north"
+      },
+      {
+        "to": "sector_00",
+        "isOpen": true,
+        "id": "door52_south"
+      }
+    ],
+    "exits": {
+      "north": "sector_17",
+      "south": "sector_00",
+      "east": null,
+      "west": null
+    },
+    "crates": 0,
+    "elevators": 0
+  }
+]

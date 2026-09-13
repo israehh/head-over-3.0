@@ -308,7 +308,14 @@ export class PuzzleSystem {
     // 4. Closed doors block crates
     for (const door of room.doors) {
       if (!door.isOpen) {
-        if (distance2D(x + 0.5, y + 0.5, door.x, door.y) < 0.85) {
+        const halfSpan = (door.width || 1.2) * 0.55;
+        const halfThick = 0.5;
+        const minX = door.orientation === 'EW' ? door.x - halfSpan : door.x - halfThick;
+        const maxX = door.orientation === 'EW' ? door.x + halfSpan : door.x + halfThick;
+        const minY = door.orientation === 'NS' ? door.y - halfSpan : door.y - halfThick;
+        const maxY = door.orientation === 'NS' ? door.y + halfSpan : door.y + halfThick;
+
+        if (x + 0.45 > minX && x - 0.45 < maxX && y + 0.45 > minY && y - 0.45 < maxY) {
           return false;
         }
       }

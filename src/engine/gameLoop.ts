@@ -291,18 +291,27 @@ export class GameEngine {
     }
   }
 
-  private isPositionWalkable(x: number, y: number, z: number, radius: number = 0.32): boolean {
-    // Check map boundaries
-    if (x - radius < 0 || x + radius >= this.currentRoom.width || y - radius < 0 || y + radius >= this.currentRoom.depth) {
+  public isPositionWalkable(x: number, y: number, z: number, radius: number = 0.32): boolean {
+    if (!this.currentRoom) return false;
+
+    // 1. Strict room bounds check with radius buffer (prevents leaving playable area)
+    if (
+      x - radius < 0.2 ||
+      x + radius >= this.currentRoom.width - 0.2 ||
+      y - radius < 0.2 ||
+      y + radius >= this.currentRoom.depth - 0.2
+    ) {
       return false;
     }
 
-    // Check 4 corner points around the player circle
+    // 2. 8 radial test points + center for comprehensive circular capsule collision
+    const testAngles = [0, 0.785, 1.571, 2.356, 3.142, 3.927, 4.712, 5.498];
     const testPoints = [
-      { x: x - radius, y: y - radius },
-      { x: x + radius, y: y - radius },
-      { x: x - radius, y: y + radius },
-      { x: x + radius, y: y + radius },
+      { x, y },
+      ...testAngles.map((ang) => ({
+        x: x + Math.cos(ang) * radius,
+        y: y + Math.sin(ang) * radius,
+      })),
     ];
 
     for (const pt of testPoints) {
@@ -313,29 +322,64 @@ export class GameEngine {
         return false;
       }
 
-      const tile = this.currentRoom.floorGrid[gx][gy];
-      // If tile is a wall: only blocks if player is not jumping/walking above the wall top
+      const tile = this.currentRoom.floorGrid[gx]?.[gy];
+      if (!tile) return false;
+
+      const isPerimeter =
+        gx === 0 || gy === 0 || gx === this.currentRoom.width - 1 || gy === this.currentRoom.depth - 1;
+
+      // Outer perimeter walls are station exterior bulkheads and can NEVER be passed through or jumped over
       if (tile.type === 'wall') {
-        if (z < (tile.elevation || 2) - 0.1) {
+        if (isPerimeter) {
+          return false;
+        }
+        // Interior walls: only walkable if player is genuinely standing on top of the wall elevation
+        const wallH = tile.elevation || 2;
+        if (z < wallH - 0.05) {
           return false;
         }
       }
 
-      // Height step tolerance: can step up 0.3 elevation without jumping (e.g. ramps / low curbs)
-      if (tile.elevation > z + 0.3) {
+      // Height step tolerance: cannot step up more than 0.35m without jumping
+      if (tile.elevation > z + 0.35) {
         return false;
       }
     }
 
-    // Check collision with crates
+    // 3. Collision with closed doors (blocks player physically until opened)
+    for (const door of this.currentRoom.doors) {
+      if (!door.isOpen) {
+        const halfSpan = (door.width || 1.2) * 0.55;
+        const halfThick = 0.45;
+        const minX = door.orientation === 'EW' ? door.x - halfSpan : door.x - halfThick;
+        const maxX = door.orientation === 'EW' ? door.x + halfSpan : door.x + halfThick;
+        const minY = door.orientation === 'NS' ? door.y - halfSpan : door.y - halfThick;
+        const maxY = door.orientation === 'NS' ? door.y + halfSpan : door.y + halfThick;
+
+        if (
+          x + radius > minX &&
+          x - radius < maxX &&
+          y + radius > minY &&
+          y - radius < maxY
+        ) {
+          const doorZ = door.z || 0;
+          const doorH = door.height || 2.2;
+          if (z < doorZ + doorH && z + 1.0 > doorZ) {
+            return false;
+          }
+        }
+      }
+    }
+
+    // 4. Collision with solid crates
     for (const crate of this.currentRoom.crates) {
       if (crate.isCarried) continue;
       const crateBox = {
-        x: crate.x - 0.5 * crate.w,
-        y: crate.y - 0.5 * crate.d,
+        x: crate.x - 0.48 * crate.w,
+        y: crate.y - 0.48 * crate.d,
         z: crate.z,
-        w: crate.w,
-        d: crate.d,
+        w: crate.w * 0.96,
+        d: crate.d * 0.96,
         h: crate.h,
       };
       const playerBox = {
@@ -348,7 +392,7 @@ export class GameEngine {
       };
 
       if (checkAABBCollision(crateBox, playerBox)) {
-        // Only block if not on top of the crate
+        // Only allow movement if player is standing safely on top of the crate
         if (z < crate.z + crate.h - 0.15) {
           return false;
         }
@@ -725,11 +769,12 @@ export class GameEngine {
       const platformHalfW = (elev.width || 1.2) * 0.55;
       const platformHalfD = (elev.depth || 1.2) * 0.55;
 
-      // Check if player is on the elevator platform
+      // Check if player is on the elevator platform (must be resting on top of it, not passing from below)
       const playerOnElev =
         Math.abs(this.player.x - elev.x) <= platformHalfW &&
         Math.abs(this.player.y - elev.y) <= platformHalfD &&
-        Math.abs(this.player.z - elev.z) <= 0.45;
+        this.player.z >= elev.z - 0.15 &&
+        this.player.z <= elev.z + 0.5;
 
       if (playerOnElev && this.player.vz <= 0.2) {
         this.player.z = elev.z;
@@ -742,7 +787,8 @@ export class GameEngine {
         if (
           Math.abs(crate.x - elev.x) <= platformHalfW &&
           Math.abs(crate.y - elev.y) <= platformHalfD &&
-          Math.abs(crate.z - elev.z) <= 0.45
+          crate.z >= elev.z - 0.15 &&
+          crate.z <= elev.z + 0.5
         ) {
           crate.z = elev.z;
           crate.vz = 0;
@@ -897,45 +943,96 @@ export class GameEngine {
         break;
     }
 
-    // Attempt front tile first
-    let dropX = Math.round(this.player.x + dirX);
-    let dropY = Math.round(this.player.y + dirY);
+    // Candidate drop positions: front direction first, then side diagonals, avoiding dropping inside player
+    const candidateOffsets = [
+      { dx: dirX, dy: dirY },
+      { dx: dirX, dy: 0 },
+      { dx: 0, dy: dirY },
+      { dx: -dirX, dy: 0 },
+      { dx: 0, dy: -dirY },
+    ].filter((o) => o.dx !== 0 || o.dy !== 0);
 
-    // If out of bounds or blocked by high wall, fallback to current player tile
-    const isOutOfBounds =
-      dropX <= 0 ||
-      dropX >= this.currentRoom.width - 1 ||
-      dropY <= 0 ||
-      dropY >= this.currentRoom.depth - 1;
-    const frontTile = !isOutOfBounds ? this.currentRoom.floorGrid[dropX]?.[dropY] : null;
-    const isFrontWall =
-      frontTile?.type === 'wall' && (frontTile.elevation || 2) > this.player.z + 1.0;
-
-    if (isOutOfBounds || isFrontWall) {
-      dropX = Math.round(this.player.x);
-      dropY = Math.round(this.player.y);
-    }
-
-    // Calculate surface height at drop location
-    const baseTile = this.currentRoom.floorGrid[dropX]?.[dropY];
-    let surfaceZ = baseTile?.elevation || 0;
+    let dropX = -1;
+    let dropY = -1;
+    let dropElev = 0;
     let stackedOnCrate: CrateEntity | null = null;
 
-    // Check for existing crates at this tile to stack on top!
-    for (const other of this.currentRoom.crates) {
-      if (other.id === crate.id || other.isCarried) continue;
-      if (Math.abs(other.x - dropX) < 0.65 && Math.abs(other.y - dropY) < 0.65) {
-        const topOfOther = other.z + other.h;
-        if (topOfOther > surfaceZ) {
-          surfaceZ = topOfOther;
-          stackedOnCrate = other;
+    for (const offset of candidateOffsets) {
+      const cx = Math.round(this.player.x + offset.dx);
+      const cy = Math.round(this.player.y + offset.dy);
+
+      if (
+        cx <= 0 ||
+        cx >= this.currentRoom.width - 1 ||
+        cy <= 0 ||
+        cy >= this.currentRoom.depth - 1
+      ) {
+        continue;
+      }
+
+      const tile = this.currentRoom.floorGrid[cx]?.[cy];
+      if (!tile || tile.type === 'wall') continue;
+
+      // Closed doors block dropping crates
+      const doorBlock = this.currentRoom.doors.some(
+        (d) => !d.isOpen && distance2D(cx, cy, d.x, d.y) < 0.85
+      );
+      if (doorBlock) continue;
+
+      // Calculate surface height at drop location
+      let surfaceZ = tile.elevation || 0;
+      let targetStack: CrateEntity | null = null;
+
+      for (const other of this.currentRoom.crates) {
+        if (other.id === crate.id || other.isCarried) continue;
+        if (Math.abs(other.x - cx) < 0.65 && Math.abs(other.y - cy) < 0.65) {
+          const top = other.z + other.h;
+          if (top > surfaceZ) {
+            surfaceZ = top;
+            targetStack = other;
+          }
         }
       }
+
+      // Height clearance check: cannot stack above station ceiling
+      if (surfaceZ > 3.5) continue;
+
+      // Valid candidate tile found!
+      dropX = cx;
+      dropY = cy;
+      dropElev = surfaceZ;
+      stackedOnCrate = targetStack;
+      break;
+    }
+
+    if (dropX === -1) {
+      // If all adjacent tiles are blocked, place under player's feet and step player onto the crate!
+      const playerTileX = Math.round(this.player.x);
+      const playerTileY = Math.round(this.player.y);
+      const curTile = this.currentRoom.floorGrid[playerTileX]?.[playerTileY];
+      let surfaceZ = curTile?.elevation || 0;
+
+      for (const other of this.currentRoom.crates) {
+        if (other.id === crate.id || other.isCarried) continue;
+        if (Math.abs(other.x - playerTileX) < 0.65 && Math.abs(other.y - playerTileY) < 0.65) {
+          const top = other.z + other.h;
+          if (top > surfaceZ) surfaceZ = top;
+        }
+      }
+
+      dropX = playerTileX;
+      dropY = playerTileY;
+      dropElev = surfaceZ;
+
+      // Elevate player to stand safely on top of newly deployed crate
+      this.player.z = dropElev + crate.h;
+      this.player.isGrounded = true;
+      this.player.vz = 0;
     }
 
     crate.x = dropX;
     crate.y = dropY;
-    crate.z = surfaceZ;
+    crate.z = dropElev;
     crate.vz = 0;
     crate.isMoving = false;
     crate.targetX = undefined;
@@ -945,13 +1042,15 @@ export class GameEngine {
     this.currentRoom.crates.push(crate);
     this.player.carriedCrate = null;
 
+    console.log(`[DIAG:CRATE] Dropped crate ${crate.id} at (${dropX}, ${dropY}, ${dropElev.toFixed(1)})`);
+
     if (stackedOnCrate) {
       sound.playCrateStack();
-      this.spawnSparks(dropX, dropY, surfaceZ);
-      this.triggerNotify(`CRATE STACKED: Elevation tier ${surfaceZ.toFixed(1)}m achieved`, 'success');
+      this.spawnSparks(dropX, dropY, dropElev);
+      this.triggerNotify(`CRATE STACKED: Elevation tier ${dropElev.toFixed(1)}m achieved`, 'success');
     } else {
       sound.playDropCrate();
-      this.spawnDust(dropX, dropY, surfaceZ);
+      this.spawnDust(dropX, dropY, dropElev);
       this.triggerNotify('CRATE DEPLOYED: Placed on deck', 'info');
     }
 
@@ -1002,18 +1101,37 @@ export class GameEngine {
     sound.playDamage();
     this.triggerNotify(`Hull integrity damaged! -${amount}%`, 'error');
 
-    // Knockback
+    // Knockback with wall & map boundary collision protection
     const dx = this.player.x - sourceX;
     const dy = this.player.y - sourceY;
     const len = Math.sqrt(dx * dx + dy * dy) || 1;
-    this.player.x += (dx / len) * 0.4;
-    this.player.y += (dy / len) * 0.4;
+    const kx = (dx / len) * 0.4;
+    const ky = (dy / len) * 0.4;
+
+    if (this.isPositionWalkable(this.player.x + kx, this.player.y, this.player.z)) {
+      this.player.x += kx;
+    }
+    if (this.isPositionWalkable(this.player.x, this.player.y + ky, this.player.z)) {
+      this.player.y += ky;
+    }
 
     this.spawnSparks(this.player.x, this.player.y, this.player.z);
 
     if (this.player.health <= 0) {
       this.isGameOver = true;
       this.triggerNotify('CRITICAL FAILURE: Hull breach. System offline.', 'error');
+    }
+  }
+
+  private bouncePlayerFrom(objX: number, objY: number, distance: number = 0.95) {
+    const dx = this.player.x - objX;
+    const dy = this.player.y - objY;
+    const len = Math.sqrt(dx * dx + dy * dy) || 1;
+    const targetX = objX + (dx / len) * distance;
+    const targetY = objY + (dy / len) * distance;
+    if (this.isPositionWalkable(targetX, targetY, this.player.z)) {
+      this.player.x = targetX;
+      this.player.y = targetY;
     }
   }
 
@@ -1199,7 +1317,8 @@ export class GameEngine {
   private checkDoors() {
     for (const door of this.currentRoom.doors) {
       const dist = distance2D(this.player.x, this.player.y, door.x, door.y);
-      if (dist < 0.85) {
+      const dz = Math.abs(this.player.z - (door.z || 0));
+      if (dist < 0.85 && dz < 1.2) {
         if (!door.isOpen) {
           // Special Apex door to Sector 20 requires all 5 fragments
           if (door.leadsToRoom === 'sector_20') {
@@ -1213,6 +1332,7 @@ export class GameEngine {
                 `NEXUS GATE SEALED: Requires all 5 Quantum Fragments (${fragCount}/5 Found)`,
                 'warn'
               );
+              this.bouncePlayerFrom(door.x, door.y);
               return;
             }
           } else if (door.requiredSwitchIds && door.requiredSwitchIds.length > 0) {
@@ -1220,6 +1340,7 @@ export class GameEngine {
               `BULKHEAD LOCKED: Controlled by ${door.requiredSwitchIds.length} remote pressure/energy relays`,
               'warn'
             );
+            this.bouncePlayerFrom(door.x, door.y);
             return;
           } else if (door.requiredKeycard) {
             const unlocked = PuzzleSystem.handleKeycardDoor(
@@ -1227,13 +1348,53 @@ export class GameEngine {
               this.player,
               this.triggerNotify.bind(this)
             );
-            if (!unlocked) return;
+            if (!unlocked) {
+              this.bouncePlayerFrom(door.x, door.y);
+              return;
+            }
+          } else {
+            this.triggerNotify(`BULKHEAD CLOSED`, 'warn');
+            this.bouncePlayerFrom(door.x, door.y);
+            return;
           }
         }
 
-        // Room Transition
+        // Room Transition via Door
         if (door.isOpen && door.leadsToRoom && this.roomsState[door.leadsToRoom]) {
-          this.transitionToRoom(door.leadsToRoom, door.spawnCoords);
+          const nextRoom = this.roomsState[door.leadsToRoom];
+          let spawnCoords = door.spawnCoords;
+          let dirLabel: 'N' | 'S' | 'E' | 'W' | 'teleport' | 'elevator' = 'E';
+          let facingDir: Direction = nextRoom.defaultPlayerSpawn.direction || 'E';
+
+          if (!spawnCoords && nextRoom.doors) {
+            // Find corresponding door in target room
+            const recip = nextRoom.doors.find((d) => d.leadsToRoom === this.currentRoom.id);
+            if (recip) {
+              if (recip.orientation === 'EW') {
+                if (recip.y <= 1.5) {
+                  spawnCoords = { x: recip.x, y: recip.y + 1.2, z: recip.z || 0 };
+                  dirLabel = 'S';
+                  facingDir = 'S';
+                } else {
+                  spawnCoords = { x: recip.x, y: recip.y - 1.2, z: recip.z || 0 };
+                  dirLabel = 'N';
+                  facingDir = 'N';
+                }
+              } else {
+                if (recip.x <= 1.5) {
+                  spawnCoords = { x: recip.x + 1.2, y: recip.y, z: recip.z || 0 };
+                  dirLabel = 'E';
+                  facingDir = 'E';
+                } else {
+                  spawnCoords = { x: recip.x - 1.2, y: recip.y, z: recip.z || 0 };
+                  dirLabel = 'W';
+                  facingDir = 'W';
+                }
+              }
+            }
+          }
+
+          this.transitionToRoom(door.leadsToRoom, spawnCoords, dirLabel, facingDir);
           break;
         }
       }
@@ -1243,7 +1404,8 @@ export class GameEngine {
   public transitionToRoom(
     newRoomId: string,
     spawnCoords?: { x: number; y: number; z: number },
-    directionLabel: 'N' | 'S' | 'E' | 'W' | 'teleport' | 'elevator' = 'E'
+    directionLabel: 'N' | 'S' | 'E' | 'W' | 'teleport' | 'elevator' = 'E',
+    facingDirection?: Direction
   ) {
     const nextRoom = this.roomsState[newRoomId];
     if (!nextRoom) return;
@@ -1254,11 +1416,15 @@ export class GameEngine {
       z: nextRoom.defaultPlayerSpawn.z,
     };
 
+    console.log(
+      `[DIAG:TRANSITION] Transitioning to room ${newRoomId} at (${targetCoords.x.toFixed(1)}, ${targetCoords.y.toFixed(1)}, ${targetCoords.z.toFixed(1)}) via ${directionLabel}`
+    );
+
     // Trigger smooth room transition with animation
     this.roomNetwork.startTransition(
       newRoomId,
       targetCoords,
-      nextRoom.defaultPlayerSpawn.direction,
+      facingDirection || nextRoom.defaultPlayerSpawn.direction,
       directionLabel
     );
   }
@@ -1272,6 +1438,10 @@ export class GameEngine {
     const pursuingDrone = this.currentRoom.drones.find(
       (d) => (d.type === 'security' || d.type === 'guardian') && d.alertState === 'chase'
     );
+    if (pursuingDrone) {
+      // Remove from current room drones list before snapshotting to prevent drone duplication
+      this.currentRoom.drones = this.currentRoom.drones.filter((d) => d.id !== pursuingDrone.id);
+    }
 
     // Unload previous room (snapshots state)
     this.roomNetwork.unloadRoom(this.currentRoom);
@@ -1281,28 +1451,108 @@ export class GameEngine {
 
     // Load and activate new room
     this.currentRoom = nextRoom;
-    this.player.x = targetCoords.x;
-    this.player.y = targetCoords.y;
-    this.player.z = targetCoords.z;
+
+    // 1. Boundary-clamp spawn coordinates safely inside room perimeter
+    let spawnX = Math.max(1.2, Math.min(nextRoom.width - 1.2, targetCoords.x));
+    let spawnY = Math.max(1.2, Math.min(nextRoom.depth - 1.2, targetCoords.y));
+
+    // 2. Safe elevation & crate obstruction resolution
+    const tileX = Math.floor(spawnX);
+    const tileY = Math.floor(spawnY);
+    let surfaceZ = nextRoom.floorGrid[tileX]?.[tileY]?.elevation || 0;
+
+    // Check if landing point is obstructed by a crate in nextRoom
+    const landingCrate = nextRoom.crates.find(
+      (c) => !c.isCarried && Math.abs(c.x - spawnX) < 0.7 && Math.abs(c.y - spawnY) < 0.7
+    );
+
+    if (landingCrate) {
+      console.warn(
+        `[DIAG:TRANSITION] Spawn collision at (${spawnX.toFixed(1)}, ${spawnY.toFixed(1)}) with crate ${landingCrate.id}. Finding safe clearance...`
+      );
+
+      // Search 8 adjacent offsets for an unobstructed walkable floor tile
+      const offsets = [
+        { dx: 1, dy: 0 },
+        { dx: -1, dy: 0 },
+        { dx: 0, dy: 1 },
+        { dx: 0, dy: -1 },
+        { dx: 1, dy: 1 },
+        { dx: -1, dy: 1 },
+        { dx: 1, dy: -1 },
+        { dx: -1, dy: -1 },
+      ];
+
+      let safePos: { x: number; y: number; z: number } | null = null;
+      for (const off of offsets) {
+        const testX = spawnX + off.dx * 1.0;
+        const testY = spawnY + off.dy * 1.0;
+        const gx = Math.floor(testX);
+        const gy = Math.floor(testY);
+
+        if (gx <= 0 || gx >= nextRoom.width - 1 || gy <= 0 || gy >= nextRoom.depth - 1) continue;
+
+        const tile = nextRoom.floorGrid[gx]?.[gy];
+        if (!tile || tile.type === 'wall') continue;
+
+        const crateAtTest = nextRoom.crates.some(
+          (c) => !c.isCarried && Math.abs(c.x - testX) < 0.7 && Math.abs(c.y - testY) < 0.7
+        );
+        if (!crateAtTest) {
+          safePos = { x: testX, y: testY, z: tile.elevation || 0 };
+          break;
+        }
+      }
+
+      if (safePos) {
+        spawnX = safePos.x;
+        spawnY = safePos.y;
+        surfaceZ = safePos.z;
+        console.log(
+          `[DIAG:TRANSITION] Repositioned player to clear tile (${spawnX.toFixed(1)}, ${spawnY.toFixed(1)}, ${surfaceZ.toFixed(1)})`
+        );
+      } else {
+        // If all adjacent tiles are blocked, spawn on top of the crate!
+        surfaceZ = landingCrate.z + landingCrate.h;
+        console.log(
+          `[DIAG:TRANSITION] Placed player on top of crate at elevation ${surfaceZ.toFixed(1)}m`
+        );
+      }
+    }
+
+    const spawnZ = Math.max(targetCoords.z, surfaceZ);
+
+    this.player.x = spawnX;
+    this.player.y = spawnY;
+    this.player.z = spawnZ;
+    this.player.isGrounded = true;
+    this.player.isJumping = false;
+    this.player.vz = 0;
+    this.player.fallStartZ = undefined;
+
     if (this.player.carriedCrate) {
-      this.player.carriedCrate.x = targetCoords.x;
-      this.player.carriedCrate.y = targetCoords.y;
-      this.player.carriedCrate.z = targetCoords.z + 1.2;
+      this.player.carriedCrate.x = spawnX;
+      this.player.carriedCrate.y = spawnY;
+      this.player.carriedCrate.z = spawnZ + 1.2;
     }
     if (direction) {
       this.player.direction = direction;
     }
     this.player.vx = 0;
     this.player.vy = 0;
-    this.player.vz = 0;
 
     // Multi-room pursuit: if Security drone was actively chasing, it follows through doorway
     if (pursuingDrone) {
-      pursuingDrone.x = targetCoords.x - (direction === 'E' ? 1.5 : direction === 'W' ? -1.5 : 0);
-      pursuingDrone.y = targetCoords.y - (direction === 'S' ? 1.5 : direction === 'N' ? -1.5 : 0);
+      const droneX = Math.max(1.2, Math.min(nextRoom.width - 1.2, spawnX - (direction === 'E' ? 1.5 : direction === 'W' ? -1.5 : 0)));
+      const droneY = Math.max(1.2, Math.min(nextRoom.depth - 1.2, spawnY - (direction === 'S' ? 1.5 : direction === 'N' ? -1.5 : 0)));
+      pursuingDrone.x = droneX;
+      pursuingDrone.y = droneY;
+      pursuingDrone.z = spawnZ;
       pursuingDrone.currentRoomId = nextRoom.id;
-      pursuingDrone.lastKnownPos = { x: targetCoords.x, y: targetCoords.y, z: targetCoords.z };
-      nextRoom.drones.push(pursuingDrone);
+      pursuingDrone.lastKnownPos = { x: spawnX, y: spawnY, z: spawnZ };
+      if (!nextRoom.drones.some((d) => d.id === pursuingDrone.id)) {
+        nextRoom.drones.push(pursuingDrone);
+      }
       sound.playSecuritySiren();
       this.triggerNotify(`SECURITY DRONE: Pursuit breached into ${nextRoom.name}!`, 'warn');
     }
