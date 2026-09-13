@@ -6,7 +6,10 @@ import { fileURLToPath } from 'node:url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Determine execution environment
+// Switch for Chromium: Allow ES modules and local asset loading from file:// URLs without CORS blocks
+app.commandLine.appendSwitch('allow-file-access-from-files');
+
+// Execution environment
 const isDev = !app.isPackaged && process.env.NODE_ENV !== 'production';
 const DEV_PORT = process.env.PORT || 3000;
 const DEV_URL = process.env.ELECTRON_DEV_URL || `http://localhost:${DEV_PORT}`;
@@ -49,9 +52,15 @@ function createMainWindow() {
   const primaryDisplay = screen.getPrimaryDisplay();
   const { width: screenWidth, height: screenHeight } = primaryDisplay.workAreaSize;
 
-  // Sizing: adaptive 16:9 / 16:10 aspect desktop viewport
   const targetWidth = Math.min(1440, Math.floor(screenWidth * 0.9));
   const targetHeight = Math.min(900, Math.floor(screenHeight * 0.9));
+
+  // Determine preload script path (.cjs ensures CommonJS execution even with "type": "module")
+  const preloadCjs = path.join(__dirname, 'preload.cjs');
+  const preloadJs = path.join(__dirname, 'preload.js');
+  const preloadPath = fs.existsSync(preloadCjs) ? preloadCjs : preloadJs;
+
+  console.log(`[Electron Main] Selected preload script: ${preloadPath}`);
 
   mainWindow = new BrowserWindow({
     title: 'Head Over Heels II - Station Overmind',
@@ -64,18 +73,44 @@ function createMainWindow() {
     autoHideMenuBar: true,
     icon: iconPath,
     webPreferences: {
-      preload: path.join(__dirname, 'preload.js'),
+      preload: preloadPath,
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: false,
+      webSecurity: false, // Critical for file:// protocol loading Vite ES modules
+      allowRunningInsecureContent: false,
       spellcheck: false,
-      backgroundThrottling: false, // Ensures game loop does not stutter in background
+      backgroundThrottling: false, // Prevents game loop pausing in background
     },
   });
 
-  // Handle window readiness: show without white flash
+  // Instrumentation: Capture all renderer console messages
+  mainWindow.webContents.on('console-message', (_event, level, message, line, sourceId) => {
+    const levelNames = ['DEBUG', 'INFO', 'WARN', 'ERROR'];
+    console.log(`[Renderer ${levelNames[level] || 'LOG'}] ${message} (${sourceId}:${line})`);
+  });
+
+  // Instrumentation: Log page load completion
+  mainWindow.webContents.on('did-finish-load', () => {
+    console.log(`[Electron Main] Page loaded successfully: ${mainWindow.webContents.getURL()}`);
+  });
+
+  // Instrumentation: Log page load failures
+  mainWindow.webContents.on('did-fail-load', (_event, errorCode, errorDescription, validatedURL, isMainFrame) => {
+    console.error(`[Electron Main] Load failure! Code: ${errorCode}, Desc: "${errorDescription}", URL: ${validatedURL}, isMainFrame: ${isMainFrame}`);
+  });
+
+  // Instrumentation: Log renderer crashes
+  mainWindow.webContents.on('render-process-gone', (_event, details) => {
+    console.error('[Electron Main] Render process gone / crashed:', details);
+  });
+
+  // Window readiness
   mainWindow.once('ready-to-show', () => {
+    console.log('[Electron Main] Window ready-to-show event fired');
     mainWindow.show();
+    // Automatically open DevTools for debugging audit
+    mainWindow.webContents.openDevTools({ mode: 'detach' });
   });
 
   // Fullscreen state notification events to renderer
@@ -103,26 +138,64 @@ function createMainWindow() {
     }
   });
 
-  // Load production bundle or development server
-  const distHtmlPath = path.join(__dirname, '../dist/index.html');
-
-  if (!isDev && fs.existsSync(distHtmlPath)) {
-    // Production Mode: Load local packaged HTML bundle
-    mainWindow.loadFile(distHtmlPath);
-  } else {
-    // Development Mode: Try dev server, fallback to dist/index.html if available
-    mainWindow.loadURL(DEV_URL).catch((err) => {
-      console.warn(`[Electron] Dev server at ${DEV_URL} not reachable, falling back to dist:`, err.message);
-      if (fs.existsSync(distHtmlPath)) {
-        mainWindow.loadFile(distHtmlPath);
-      } else {
-        mainWindow.loadURL(DEV_URL);
-      }
-    });
-  }
+  // Load Content
+  loadGameContent();
 
   // Register native application menu
   createApplicationMenu();
+}
+
+/**
+ * Robust content loader for Electron
+ */
+async function loadGameContent() {
+  const distHtmlPath = path.join(__dirname, '../dist/index.html');
+  const hasDist = fs.existsSync(distHtmlPath);
+
+  console.log(`[Electron Main] Loading game content... hasDist=${hasDist}, isDev=${isDev}`);
+
+  // 1. If explicit ELECTRON_DEV_URL was supplied, load dev server
+  if (process.env.ELECTRON_DEV_URL) {
+    try {
+      console.log(`[Electron Main] Loading explicit ELECTRON_DEV_URL: ${process.env.ELECTRON_DEV_URL}`);
+      await mainWindow.loadURL(process.env.ELECTRON_DEV_URL);
+      return;
+    } catch (err) {
+      console.warn(`[Electron Main] Explicit ELECTRON_DEV_URL failed: ${err.message}`);
+    }
+  }
+
+  // 2. If packaged or if dist/index.html exists and FORCE_DEV_SERVER is not set, load built bundle
+  if (hasDist && (app.isPackaged || !process.env.FORCE_DEV_SERVER)) {
+    console.log(`[Electron Main] Loading production bundle: ${distHtmlPath}`);
+    try {
+      await mainWindow.loadFile(distHtmlPath);
+      return;
+    } catch (err) {
+      console.error(`[Electron Main] Failed to load ${distHtmlPath}:`, err);
+    }
+  }
+
+  // 3. Fallback: attempt connecting to dev server
+  console.log(`[Electron Main] Attempting dev server connection: ${DEV_URL}`);
+  try {
+    await mainWindow.loadURL(DEV_URL);
+  } catch (devErr) {
+    console.warn(`[Electron Main] Dev server unreachable at ${DEV_URL}: ${devErr.message}`);
+    if (hasDist) {
+      console.log(`[Electron Main] Falling back to existing dist/index.html: ${distHtmlPath}`);
+      await mainWindow.loadFile(distHtmlPath);
+    } else {
+      console.error('[Electron Main] Neither dev server nor dist/index.html available.');
+      mainWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(`
+        <body style="background:#0a0a14;color:#f87171;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;flex-direction:column;text-align:center;padding:20px;">
+          <h2>Head Over Heels II - Startup Error</h2>
+          <p style="color:#94a3b8;">Neither the local build (dist/index.html) nor dev server (${DEV_URL}) could be reached.</p>
+          <p style="color:#38bdf8;">Run: <code>npm run build</code> in the project directory, then restart Electron.</p>
+        </body>
+      `)}`);
+    }
+  }
 }
 
 /**

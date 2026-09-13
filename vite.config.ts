@@ -6,7 +6,16 @@ import {defineConfig} from 'vite';
 export default defineConfig(() => {
   return {
     base: './',
-    plugins: [react(), tailwindcss()],
+    plugins: [
+      react(),
+      tailwindcss(),
+      {
+        name: 'electron-file-protocol-compat',
+        transformIndexHtml(html: string) {
+          return html.replace(/ crossorigin(=("[^"]*"|'[^']*'|[^>\s]+))?/g, '');
+        },
+      },
+    ],
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
