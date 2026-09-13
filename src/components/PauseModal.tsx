@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import {
+  BookOpen,
   CheckCircle2,
   Circle,
   Compass,
@@ -31,6 +32,7 @@ interface PauseModalProps {
   engine: GameEngine;
   initialTab?: 'map' | 'inventory' | 'objectives' | 'save' | 'settings';
   onOpenPythonModal: () => void;
+  onOpenWalkthrough?: () => void;
   onRestart: () => void;
 }
 
@@ -40,6 +42,7 @@ export const PauseModal: React.FC<PauseModalProps> = ({
   engine,
   initialTab = 'map',
   onOpenPythonModal,
+  onOpenWalkthrough,
   onRestart,
 }) => {
   const [activeTab, setActiveTab] = useState<'map' | 'inventory' | 'objectives' | 'save' | 'settings'>(initialTab);
@@ -799,6 +802,34 @@ export const PauseModal: React.FC<PauseModalProps> = ({
                     Toggle Fullscreen (F11)
                   </button>
                 </div>
+
+                {/* Tactical Walkthrough Guide Card */}
+                {onOpenWalkthrough && (
+                  <div className="p-4 rounded-xl bg-cyan-950/40 border border-cyan-700/60 space-y-2 sm:col-span-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <BookOpen className="w-4 h-4 text-cyan-400" />
+                        <span className="text-xs font-bold text-cyan-200">
+                          Guía Oficial de Estrategia y Solución (Descargable)
+                        </span>
+                      </div>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-900 text-cyan-300 border border-cyan-600">
+                        PDF / TXT / MD
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-300">
+                      Accede a la solución completa paso a paso de todos los 52 sectores, localización de los 15 Fragmentos Nexus, llaves maestras, 7 salas secretas y atajos directos con opción de descarga o guardado como PDF en A4.
+                    </p>
+                    <div className="flex items-center gap-3 pt-1">
+                      <button
+                        onClick={onOpenWalkthrough}
+                        className="py-2 px-4 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-mono font-bold transition-all shadow-md shadow-cyan-500/20"
+                      >
+                        Abrir y Descargar Walkthrough
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -806,12 +837,24 @@ export const PauseModal: React.FC<PauseModalProps> = ({
 
         {/* Footer Actions */}
         <div className="flex items-center justify-between px-5 py-3.5 border-t border-slate-800 bg-slate-950/80">
-          <button
-            onClick={onOpenPythonModal}
-            className="flex items-center gap-1.5 text-xs font-mono text-indigo-400 hover:text-indigo-300 transition-colors"
-          >
-            <Download className="w-4 h-4" /> Python / Pygame Architecture
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={onOpenPythonModal}
+              className="flex items-center gap-1.5 text-xs font-mono text-indigo-400 hover:text-indigo-300 transition-colors"
+            >
+              <Download className="w-4 h-4" /> Python / Pygame
+            </button>
+
+            {onOpenWalkthrough && (
+              <button
+                id="pause-walkthrough-btn"
+                onClick={onOpenWalkthrough}
+                className="flex items-center gap-1.5 text-xs font-mono text-cyan-400 hover:text-cyan-300 transition-colors font-bold"
+              >
+                <BookOpen className="w-4 h-4" /> Guía Oficial Walkthrough
+              </button>
+            )}
+          </div>
 
           <div className="flex items-center gap-2">
             <button

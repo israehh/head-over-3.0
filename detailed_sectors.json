@@ -1,0 +1,2810 @@
+{
+  "sector_01": {
+    "id": "sector_01",
+    "name": "Cryo-Dock Awakening",
+    "desc": "Primary stasis bay of Orbital Station Zenith. Restore auxiliary circuits and calibrate movement.",
+    "exits": {
+      "north": "sector_00",
+      "south": "sector_05",
+      "east": "sector_02",
+      "west": null
+    },
+    "items": [
+      {
+        "name": "Plasma Energy Cell",
+        "type": "energy_cell",
+        "desc": "Stabilizes orbital gravity regulators.",
+        "x": 8,
+        "y": 2,
+        "z": 1.2
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw01_plate",
+        "type": "pressure",
+        "x": 7,
+        "y": 4
+      },
+      {
+        "id": "sw01_term",
+        "type": "terminal",
+        "x": 2,
+        "y": 7
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_02",
+        "isOpen": true,
+        "id": "door01_east"
+      },
+      {
+        "to": "sector_05",
+        "isOpen": true,
+        "id": "door01_south"
+      },
+      {
+        "to": "sector_00",
+        "isOpen": true,
+        "id": "door01_north"
+      }
+    ],
+    "drones": [],
+    "lasers": 1,
+    "elevators": []
+  },
+  "sector_02": {
+    "id": "sector_02",
+    "name": "Jump Calibration Bay",
+    "desc": "Multi-tiered platforming calibration deck. Use jump thrusters to scale elevated structures.",
+    "exits": {
+      "north": null,
+      "south": "sector_06",
+      "east": "sector_03",
+      "west": "sector_01"
+    },
+    "items": [
+      {
+        "name": "Blue Keycard",
+        "type": "keycard_blue",
+        "desc": "Tier 1 Security Clearance.",
+        "x": 7,
+        "y": 6,
+        "z": 2.2
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw02_high",
+        "type": "pressure",
+        "x": 4,
+        "y": 4
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_01",
+        "isOpen": true,
+        "id": "door02_west"
+      },
+      {
+        "to": "sector_03",
+        "isOpen": true,
+        "id": "door02_east"
+      },
+      {
+        "to": "sector_06",
+        "isOpen": true,
+        "id": "door02_south"
+      }
+    ],
+    "drones": [],
+    "lasers": 0,
+    "elevators": []
+  },
+  "sector_03": {
+    "id": "sector_03",
+    "name": "Crate Logistics Lab",
+    "desc": "Logistics handling sector. Push heavy storage cubes to bypass pressure barriers.",
+    "exits": {
+      "north": "sector_50",
+      "south": "sector_07",
+      "east": "sector_04",
+      "west": "sector_02"
+    },
+    "items": [
+      {
+        "name": "Nano Medkit",
+        "type": "medkit",
+        "desc": "Restores 40 Hull.",
+        "x": 8,
+        "y": 5,
+        "z": 1.2
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw03_door",
+        "type": "pressure",
+        "x": 6,
+        "y": 4
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_02",
+        "isOpen": true,
+        "id": "door03_west"
+      },
+      {
+        "to": "sector_04",
+        "reqKey": "BLUE",
+        "isOpen": false,
+        "id": "door03_east"
+      },
+      {
+        "to": "sector_07",
+        "isOpen": true,
+        "id": "door03_south"
+      },
+      {
+        "to": "sector_50",
+        "isOpen": true,
+        "id": "door03_north_shortcut"
+      }
+    ],
+    "drones": [],
+    "lasers": 0,
+    "elevators": []
+  },
+  "sector_04": {
+    "id": "sector_04",
+    "name": "Apex Vault I: Cryo Matrix",
+    "desc": "Sanctuary of the first Quantum Nexus Fragment. Guarded by an autonomous sentry drone.",
+    "exits": {
+      "north": null,
+      "south": "sector_08",
+      "east": null,
+      "west": "sector_03"
+    },
+    "items": [
+      {
+        "name": "Nexus Fragment I: Cryo Matrix",
+        "type": "nexus_fragment",
+        "desc": "Harmonizes station temperature controls.",
+        "x": 5,
+        "y": 5,
+        "z": 2.2
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw04_pedestal",
+        "type": "pressure",
+        "x": 5,
+        "y": 4
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_03",
+        "isOpen": true,
+        "id": "door04_west"
+      },
+      {
+        "to": "sector_08",
+        "isOpen": true,
+        "id": "door04_south"
+      }
+    ],
+    "drones": [
+      {
+        "type": "patrol"
+      }
+    ],
+    "lasers": 0,
+    "elevators": []
+  },
+  "sector_05": {
+    "id": "sector_05",
+    "name": "Dual Relay Chamber",
+    "desc": "Coupled pressure switch room. Both circuit plates must be weighed down simultaneously.",
+    "exits": {
+      "north": "sector_01",
+      "south": "sector_09",
+      "east": "sector_06",
+      "west": null
+    },
+    "items": [
+      {
+        "name": "Plasma Energy Cell",
+        "type": "energy_cell",
+        "desc": "High-density energy capacitor.",
+        "x": 5,
+        "y": 5,
+        "z": 0.2
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw05_left",
+        "type": "pressure",
+        "x": 3,
+        "y": 7
+      },
+      {
+        "id": "sw05_right",
+        "type": "pressure",
+        "x": 7,
+        "y": 3
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_01",
+        "isOpen": true,
+        "id": "door05_north"
+      },
+      {
+        "to": "sector_06",
+        "reqSwitches": [
+          "sw05_left",
+          "sw05_right"
+        ],
+        "isOpen": false,
+        "id": "door05_east"
+      },
+      {
+        "to": "sector_09",
+        "isOpen": true,
+        "id": "door05_south"
+      }
+    ],
+    "drones": [],
+    "lasers": 2,
+    "elevators": []
+  },
+  "sector_06": {
+    "id": "sector_06",
+    "name": "Stacking Stepper Pit",
+    "desc": "Hazardous floor gap. Build a stepping staircase across the pit using industrial blocks.",
+    "exits": {
+      "north": "sector_02",
+      "south": "sector_10",
+      "east": "sector_07",
+      "west": "sector_05"
+    },
+    "items": [
+      {
+        "name": "Nano Medkit",
+        "type": "medkit",
+        "desc": "Emergency field sutures.",
+        "x": 8,
+        "y": 5,
+        "z": 1.2
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw06_bridge",
+        "type": "pressure",
+        "x": 7,
+        "y": 5
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_02",
+        "isOpen": true,
+        "id": "door06_north"
+      },
+      {
+        "to": "sector_05",
+        "isOpen": true,
+        "id": "door06_west"
+      },
+      {
+        "to": "sector_07",
+        "isOpen": true,
+        "id": "door06_east"
+      },
+      {
+        "to": "sector_10",
+        "reqSwitches": [
+          "sw06_bridge"
+        ],
+        "isOpen": false,
+        "id": "door06_south"
+      },
+      {
+        "to": "sector_51",
+        "isOpen": true,
+        "id": "door06_shortcut_51"
+      }
+    ],
+    "drones": [],
+    "lasers": 0,
+    "elevators": []
+  },
+  "sector_07": {
+    "id": "sector_07",
+    "name": "Laser Synchronization Maze",
+    "desc": "Labyrinth of reactive laser emitters. Synchronize terminal toggles to secure the Red Keycard.",
+    "exits": {
+      "north": "sector_03",
+      "south": "sector_11",
+      "east": "sector_08",
+      "west": "sector_06"
+    },
+    "items": [
+      {
+        "name": "Red Keycard",
+        "type": "keycard_red",
+        "desc": "Tier 2 Clearance for Reactor and Hangars.",
+        "x": 10,
+        "y": 6,
+        "z": 1.2
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw07_term1",
+        "type": "terminal",
+        "x": 5,
+        "y": 3
+      },
+      {
+        "id": "sw07_term2",
+        "type": "terminal",
+        "x": 7,
+        "y": 5
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_03",
+        "isOpen": true,
+        "id": "door07_north"
+      },
+      {
+        "to": "sector_06",
+        "isOpen": true,
+        "id": "door07_west"
+      },
+      {
+        "to": "sector_08",
+        "isOpen": true,
+        "id": "door07_east"
+      },
+      {
+        "to": "sector_11",
+        "isOpen": true,
+        "id": "door07_south"
+      }
+    ],
+    "drones": [
+      {
+        "type": "turret"
+      }
+    ],
+    "lasers": 2,
+    "elevators": []
+  },
+  "sector_08": {
+    "id": "sector_08",
+    "name": "Quantum Inversion Matrix",
+    "desc": "Teleportation test chamber housing Nexus Fragment II. Route particle beams across elevations.",
+    "exits": {
+      "north": "sector_04",
+      "south": "sector_12",
+      "east": null,
+      "west": "sector_07"
+    },
+    "items": [
+      {
+        "name": "Nexus Fragment II: Fusion Core",
+        "type": "nexus_fragment",
+        "desc": "Stabilizes magnetic reactor confinement.",
+        "x": 8.5,
+        "y": 8,
+        "z": 2.2
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw08_power",
+        "type": "terminal",
+        "x": 3,
+        "y": 3
+      },
+      {
+        "id": "sw08_ped",
+        "type": "pressure",
+        "x": 5,
+        "y": 5
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_04",
+        "isOpen": true,
+        "id": "door08_north"
+      },
+      {
+        "to": "sector_07",
+        "isOpen": true,
+        "id": "door08_west"
+      },
+      {
+        "to": "sector_12",
+        "isOpen": true,
+        "id": "door08_south"
+      }
+    ],
+    "drones": [
+      {
+        "type": "security"
+      }
+    ],
+    "lasers": 0,
+    "elevators": [
+      "elev08_lift"
+    ]
+  },
+  "sector_09": {
+    "id": "sector_09",
+    "name": "Freight Receiving Dock",
+    "desc": "Primary cargo loading dock. Heavy freight containers and service lifts connect the bays.",
+    "exits": {
+      "north": "sector_05",
+      "south": "sector_13",
+      "east": "sector_10",
+      "west": "sector_50"
+    },
+    "items": [
+      {
+        "name": "Plasma Energy Cell",
+        "type": "energy_cell",
+        "desc": "High-density plasma cell.",
+        "x": 9,
+        "y": 8,
+        "z": 1.2
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw09_lift",
+        "type": "pressure",
+        "x": 3,
+        "y": 8
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_05",
+        "isOpen": true,
+        "id": "door09_north"
+      },
+      {
+        "to": "sector_10",
+        "isOpen": true,
+        "id": "door09_east"
+      },
+      {
+        "to": "sector_13",
+        "isOpen": true,
+        "id": "door09_south"
+      },
+      {
+        "to": "sector_50",
+        "isOpen": true,
+        "id": "door09_west_shortcut"
+      }
+    ],
+    "drones": [],
+    "lasers": 0,
+    "elevators": [
+      "elev09_sub"
+    ]
+  },
+  "sector_10": {
+    "id": "sector_10",
+    "name": "Deep Cryo Warehouse",
+    "desc": "Sub-zero storage bays. Slick metallic decks allow rapid crate momentum sliding.",
+    "exits": {
+      "north": "sector_06",
+      "south": "sector_14",
+      "east": "sector_11",
+      "west": "sector_09"
+    },
+    "items": [
+      {
+        "name": "Nano Medkit",
+        "type": "medkit",
+        "desc": "Emergency recovery field.",
+        "x": 5,
+        "y": 4,
+        "z": 1.2
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw10_gate",
+        "type": "pressure",
+        "x": 5,
+        "y": 7
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_06",
+        "isOpen": true,
+        "id": "door10_north"
+      },
+      {
+        "to": "sector_09",
+        "isOpen": true,
+        "id": "door10_west"
+      },
+      {
+        "to": "sector_11",
+        "isOpen": true,
+        "id": "door10_east"
+      },
+      {
+        "to": "sector_14",
+        "isOpen": true,
+        "id": "door10_south"
+      },
+      {
+        "to": "sector_46",
+        "isOpen": true,
+        "id": "door10_secret_46"
+      }
+    ],
+    "drones": [],
+    "lasers": 1,
+    "elevators": []
+  },
+  "sector_11": {
+    "id": "sector_11",
+    "name": "Hazardous Waste Sump",
+    "desc": "Sealed chemical disposal sector. Navigate narrow catwalks above toxic chemical pools.",
+    "exits": {
+      "north": "sector_07",
+      "south": "sector_15",
+      "east": "sector_12",
+      "west": "sector_10"
+    },
+    "items": [
+      {
+        "name": "Plasma Energy Cell",
+        "type": "energy_cell",
+        "desc": "High yield power cell.",
+        "x": 8,
+        "y": 2,
+        "z": 0.2
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw11_sump",
+        "type": "pressure",
+        "x": 5.5,
+        "y": 4
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_07",
+        "isOpen": true,
+        "id": "door11_north"
+      },
+      {
+        "to": "sector_10",
+        "isOpen": true,
+        "id": "door11_west"
+      },
+      {
+        "to": "sector_12",
+        "isOpen": true,
+        "id": "door11_east"
+      },
+      {
+        "to": "sector_15",
+        "reqSwitches": [
+          "sw11_sump"
+        ],
+        "isOpen": false,
+        "id": "door11_south"
+      }
+    ],
+    "drones": [
+      {
+        "type": "security"
+      },
+      {
+        "type": "turret"
+      }
+    ],
+    "lasers": 0,
+    "elevators": []
+  },
+  "sector_12": {
+    "id": "sector_12",
+    "name": "High-Value Vault III: AI Sub-Brain",
+    "desc": "Reinforced high-security vault storing Nexus Fragment III. Encased behind blast locks.",
+    "exits": {
+      "north": "sector_08",
+      "south": "sector_16",
+      "east": null,
+      "west": "sector_11"
+    },
+    "items": [
+      {
+        "name": "Nexus Fragment III: Cybernetic Overmind",
+        "type": "nexus_fragment",
+        "desc": "AI co-processor sub-matrix fragment.",
+        "x": 5.5,
+        "y": 5.5,
+        "z": 1.2
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw12_vault",
+        "type": "pressure",
+        "x": 5,
+        "y": 3
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_08",
+        "isOpen": true,
+        "id": "door12_north"
+      },
+      {
+        "to": "sector_11",
+        "isOpen": true,
+        "id": "door12_west"
+      },
+      {
+        "to": "sector_16",
+        "isOpen": true,
+        "id": "door12_south"
+      }
+    ],
+    "drones": [
+      {
+        "type": "flying_sentinel"
+      }
+    ],
+    "lasers": 0,
+    "elevators": []
+  },
+  "sector_13": {
+    "id": "sector_13",
+    "name": "Plasma Generator Hub",
+    "desc": "Primary plasma generation conduit. Pulsing reactors supply power across station bulkheads.",
+    "exits": {
+      "north": "sector_09",
+      "south": "sector_17",
+      "east": "sector_14",
+      "west": "sector_51"
+    },
+    "items": [
+      {
+        "name": "Plasma Energy Cell",
+        "type": "energy_cell",
+        "desc": "Direct reactor fuel cell.",
+        "x": 8,
+        "y": 8,
+        "z": 0.2
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw13_plasma",
+        "type": "pressure",
+        "x": 5.5,
+        "y": 7
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_09",
+        "isOpen": true,
+        "id": "door13_north"
+      },
+      {
+        "to": "sector_14",
+        "isOpen": true,
+        "id": "door13_east"
+      },
+      {
+        "to": "sector_17",
+        "isOpen": true,
+        "id": "door13_south"
+      },
+      {
+        "to": "sector_51",
+        "isOpen": true,
+        "id": "door13_west_shortcut"
+      }
+    ],
+    "drones": [],
+    "lasers": 1,
+    "elevators": []
+  },
+  "sector_14": {
+    "id": "sector_14",
+    "name": "High Voltage Transformer",
+    "desc": "High voltage substation. Push insulating blocks to intercept cascading laser arcs.",
+    "exits": {
+      "north": "sector_10",
+      "south": "sector_18",
+      "east": "sector_15",
+      "west": "sector_13"
+    },
+    "items": [
+      {
+        "name": "Nano Medkit",
+        "type": "medkit",
+        "desc": "Emergency med pack.",
+        "x": 5,
+        "y": 2,
+        "z": 0.2
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw14_trans",
+        "type": "pressure",
+        "x": 5,
+        "y": 5
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_10",
+        "isOpen": true,
+        "id": "door14_north"
+      },
+      {
+        "to": "sector_13",
+        "isOpen": true,
+        "id": "door14_west"
+      },
+      {
+        "to": "sector_15",
+        "isOpen": true,
+        "id": "door14_east"
+      },
+      {
+        "to": "sector_18",
+        "isOpen": true,
+        "id": "door14_south"
+      }
+    ],
+    "drones": [],
+    "lasers": 1,
+    "elevators": []
+  },
+  "sector_15": {
+    "id": "sector_15",
+    "name": "Supercharger Sub-Station",
+    "desc": "Critical power relay storing the Green Keycard. Clearance permits passage to the Citadel.",
+    "exits": {
+      "north": "sector_11",
+      "south": "sector_19",
+      "east": "sector_16",
+      "west": "sector_14"
+    },
+    "items": [
+      {
+        "name": "Green Keycard",
+        "type": "keycard_green",
+        "desc": "Tier 3 Master Clearance for Omega Sanctum.",
+        "x": 8.5,
+        "y": 5.5,
+        "z": 1.2
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw15_relay",
+        "type": "pressure",
+        "x": 6,
+        "y": 5.5
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_11",
+        "isOpen": true,
+        "id": "door15_north"
+      },
+      {
+        "to": "sector_14",
+        "isOpen": true,
+        "id": "door15_west"
+      },
+      {
+        "to": "sector_16",
+        "isOpen": true,
+        "id": "door15_east"
+      },
+      {
+        "to": "sector_19",
+        "reqKey": "RED",
+        "isOpen": false,
+        "id": "door15_south"
+      }
+    ],
+    "drones": [
+      {
+        "type": "patrol"
+      }
+    ],
+    "lasers": 1,
+    "elevators": []
+  },
+  "sector_16": {
+    "id": "sector_16",
+    "name": "Reactor Core Apex",
+    "desc": "Graviton Dynamo chamber harboring Nexus Fragment IV. Heavy radiation requires precision navigation.",
+    "exits": {
+      "north": "sector_12",
+      "south": "sector_20",
+      "east": null,
+      "west": "sector_15"
+    },
+    "items": [
+      {
+        "name": "Nexus Fragment IV: Graviton Dynamo",
+        "type": "nexus_fragment",
+        "desc": "Stabilizes station gravitational equilibrium.",
+        "x": 5.5,
+        "y": 5.5,
+        "z": 1.2
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw16_dynamo",
+        "type": "pressure",
+        "x": 5.5,
+        "y": 3
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_12",
+        "isOpen": true,
+        "id": "door16_north"
+      },
+      {
+        "to": "sector_15",
+        "isOpen": true,
+        "id": "door16_west"
+      },
+      {
+        "to": "sector_20",
+        "isOpen": true,
+        "id": "door16_south"
+      }
+    ],
+    "drones": [
+      {
+        "type": "security"
+      }
+    ],
+    "lasers": 0,
+    "elevators": []
+  },
+  "sector_17": {
+    "id": "sector_17",
+    "name": "Drone Sentinel Perimeter",
+    "desc": "Front line defense matrix. Heavy autonomous sentry bots patrol the corridors.",
+    "exits": {
+      "north": "sector_13",
+      "south": "sector_52",
+      "east": "sector_18",
+      "west": null
+    },
+    "items": [
+      {
+        "name": "Plasma Energy Cell",
+        "type": "energy_cell",
+        "desc": "High yield power cell.",
+        "x": 8,
+        "y": 8,
+        "z": 1.2
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw17_bypass",
+        "type": "pressure",
+        "x": 5.5,
+        "y": 6
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_13",
+        "isOpen": true,
+        "id": "door17_north"
+      },
+      {
+        "to": "sector_18",
+        "isOpen": true,
+        "id": "door17_east"
+      },
+      {
+        "to": "sector_52",
+        "isOpen": true,
+        "id": "door17_south_shortcut"
+      }
+    ],
+    "drones": [
+      {
+        "type": "patrol"
+      },
+      {
+        "type": "patrol"
+      }
+    ],
+    "lasers": 0,
+    "elevators": []
+  },
+  "sector_18": {
+    "id": "sector_18",
+    "name": "Interceptor Bastion",
+    "desc": "High alert interceptor redoubt. Guardian drones lock on and pursue intruders relentlessly.",
+    "exits": {
+      "north": "sector_14",
+      "south": null,
+      "east": "sector_19",
+      "west": "sector_17"
+    },
+    "items": [
+      {
+        "name": "Nano Medkit",
+        "type": "medkit",
+        "desc": "Full health suture kit.",
+        "x": 5.5,
+        "y": 2,
+        "z": 0.2
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw18_a",
+        "type": "pressure",
+        "x": 4,
+        "y": 5
+      },
+      {
+        "id": "sw18_b",
+        "type": "pressure",
+        "x": 7,
+        "y": 5
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_14",
+        "isOpen": true,
+        "id": "door18_north"
+      },
+      {
+        "to": "sector_17",
+        "isOpen": true,
+        "id": "door18_west"
+      },
+      {
+        "to": "sector_19",
+        "reqSwitches": [
+          "sw18_a",
+          "sw18_b"
+        ],
+        "isOpen": false,
+        "id": "door18_east"
+      },
+      {
+        "to": "sector_47",
+        "isOpen": true,
+        "id": "door18_secret_47"
+      }
+    ],
+    "drones": [
+      {
+        "type": "guardian"
+      }
+    ],
+    "lasers": 0,
+    "elevators": []
+  },
+  "sector_19": {
+    "id": "sector_19",
+    "name": "Master Access Antechamber",
+    "desc": "Outer antechamber to the Overmind Core. Nexus Fragment V must be unified to unlock Sector 20.",
+    "exits": {
+      "north": "sector_15",
+      "south": null,
+      "east": "sector_20",
+      "west": "sector_18"
+    },
+    "items": [
+      {
+        "name": "Nexus Fragment V: Chrono Resonance",
+        "type": "nexus_fragment",
+        "desc": "Fifth and final fragment. Harmonizes hyperspace matrix.",
+        "x": 8.5,
+        "y": 5.5,
+        "z": 1.2
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw19_gate",
+        "type": "terminal",
+        "x": 5.5,
+        "y": 5.5
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_15",
+        "isOpen": true,
+        "id": "door19_north"
+      },
+      {
+        "to": "sector_18",
+        "isOpen": true,
+        "id": "door19_west"
+      },
+      {
+        "to": "sector_20",
+        "reqKey": "GREEN",
+        "isOpen": false,
+        "id": "door19_east"
+      }
+    ],
+    "drones": [
+      {
+        "type": "guardian"
+      }
+    ],
+    "lasers": 1,
+    "elevators": []
+  },
+  "sector_20": {
+    "id": "sector_20",
+    "name": "Overmind Sanctum Core",
+    "desc": "Central nexus of Station Zenith. Unify all 5 Nexus Fragments and 3 Energy Cells to trigger hyperspace warp.",
+    "exits": {
+      "north": "sector_16",
+      "south": null,
+      "east": null,
+      "west": "sector_19"
+    },
+    "items": [],
+    "switches": [
+      {
+        "id": "sw20_apex",
+        "type": "pressure",
+        "x": 7,
+        "y": 6.5
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_16",
+        "isOpen": true,
+        "id": "door20_north"
+      },
+      {
+        "to": "sector_19",
+        "isOpen": true,
+        "id": "door20_west"
+      }
+    ],
+    "drones": [
+      {
+        "type": "guardian"
+      },
+      {
+        "type": "guardian"
+      }
+    ],
+    "lasers": 0,
+    "elevators": []
+  },
+  "sector_00": {
+    "id": "sector_00",
+    "name": "Orbital Transit Grand Nexus",
+    "desc": "Grand central transit atrium connecting Wing B Cargo Facilities and Wing C Energy Reactor. Features dual moving transit elevators, perimeter mezzanine catwalks, and the central Fragment Receptacle.",
+    "exits": {
+      "north": null,
+      "south": "sector_01",
+      "east": "sector_28",
+      "west": "sector_21"
+    },
+    "items": [
+      {
+        "name": "Nexus High-Output Cell",
+        "type": "energy_cell",
+        "desc": "Power cell stabilizing central transit grid.",
+        "x": 6.5,
+        "y": 2.5,
+        "z": 2.2
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw00_receptacle",
+        "type": "terminal",
+        "x": 6.5,
+        "y": 6.5
+      },
+      {
+        "id": "sw00_mezzanine",
+        "type": "toggle",
+        "x": 6.5,
+        "y": 1.5
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_01",
+        "isOpen": true,
+        "id": "door00_south"
+      },
+      {
+        "to": "sector_21",
+        "isOpen": true,
+        "id": "door00_west"
+      },
+      {
+        "to": "sector_28",
+        "isOpen": true,
+        "id": "door00_east"
+      },
+      {
+        "to": "sector_27",
+        "isOpen": true,
+        "id": "door00_shortcut_b"
+      },
+      {
+        "to": "sector_34",
+        "isOpen": true,
+        "id": "door00_shortcut_c"
+      },
+      {
+        "to": "sector_52",
+        "isOpen": true,
+        "id": "door00_southwest_shortcut_52"
+      }
+    ],
+    "drones": [],
+    "lasers": 0,
+    "elevators": [
+      "elev00_west",
+      "elev00_east"
+    ]
+  },
+  "sector_21": {
+    "id": "sector_21",
+    "name": "Cargo Intake & Weigh Station",
+    "desc": "Automated freight receiving line. Heavy pallets must be positioned on calibrated pressure scales to disengage security laser fences.",
+    "exits": {
+      "north": "sector_22",
+      "south": null,
+      "east": "sector_00",
+      "west": "sector_23"
+    },
+    "items": [
+      {
+        "name": "Freight Battery Unit",
+        "type": "energy_cell",
+        "desc": "Standard industrial power cell.",
+        "x": 9,
+        "y": 9,
+        "z": 0
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw21_plate",
+        "type": "pressure",
+        "x": 5.5,
+        "y": 4
+      },
+      {
+        "id": "sw21_term",
+        "type": "terminal",
+        "x": 9,
+        "y": 3
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_00",
+        "isOpen": true,
+        "id": "door21_east"
+      },
+      {
+        "to": "sector_22",
+        "isOpen": true,
+        "id": "door21_north"
+      },
+      {
+        "to": "sector_23",
+        "isOpen": true,
+        "id": "door21_west"
+      }
+    ],
+    "drones": [
+      {
+        "type": "turret"
+      }
+    ],
+    "lasers": 1,
+    "elevators": []
+  },
+  "sector_22": {
+    "id": "sector_22",
+    "name": "Hydraulic Lift Shaft",
+    "desc": "Massive hydraulic freight elevator. Ride the vertical lift platform to reach the upper gantry crane controls.",
+    "exits": {
+      "north": "sector_24",
+      "south": "sector_21",
+      "east": null,
+      "west": null
+    },
+    "items": [
+      {
+        "name": "Gantry Capacitor",
+        "type": "energy_cell",
+        "desc": "Restores auxiliary power.",
+        "x": 7.5,
+        "y": 2,
+        "z": 2.7
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw22_terminal",
+        "type": "terminal",
+        "x": 2,
+        "y": 2
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_21",
+        "isOpen": true,
+        "id": "door22_south"
+      },
+      {
+        "to": "sector_24",
+        "isOpen": true,
+        "id": "door22_north"
+      }
+    ],
+    "drones": [
+      {
+        "type": "patrol"
+      }
+    ],
+    "lasers": 0,
+    "elevators": [
+      "elev22_main"
+    ]
+  },
+  "sector_23": {
+    "id": "sector_23",
+    "name": "Sub-Zero Stacking Bay",
+    "desc": "Cryogenic staging chamber. A sheer two-unit vertical bulkhead blocks the upper catwalk. Push crate from the raised ledge to stack atop the floor crate!",
+    "exits": {
+      "north": "sector_24",
+      "south": "sector_35",
+      "east": "sector_21",
+      "west": null
+    },
+    "items": [
+      {
+        "name": "Cryo-Medkit",
+        "type": "medkit",
+        "desc": "Thermal trauma restoration pack.",
+        "x": 8,
+        "y": 8,
+        "z": 0
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw23_bypass",
+        "type": "terminal",
+        "x": 7,
+        "y": 2
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_21",
+        "isOpen": true,
+        "id": "door23_east"
+      },
+      {
+        "to": "sector_24",
+        "isOpen": true,
+        "id": "door23_north"
+      },
+      {
+        "to": "sector_35",
+        "isOpen": true,
+        "id": "door23_south_to_35"
+      }
+    ],
+    "drones": [],
+    "lasers": 0,
+    "elevators": []
+  },
+  "sector_24": {
+    "id": "sector_24",
+    "name": "Container Crane Gantry",
+    "desc": "Suspended high catwalks spanning across automated container bays. Secret air vent in the southeast ledge leads down to the maintenance substructure.",
+    "exits": {
+      "north": "sector_25",
+      "south": "sector_22",
+      "east": "sector_27",
+      "west": "sector_23"
+    },
+    "items": [
+      {
+        "name": "Crane Servo Cell",
+        "type": "energy_cell",
+        "desc": "Auxiliary servo cell.",
+        "x": 2,
+        "y": 2,
+        "z": 2.2
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw24_crane",
+        "type": "terminal",
+        "x": 6.5,
+        "y": 3
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_22",
+        "isOpen": true,
+        "id": "door24_south"
+      },
+      {
+        "to": "sector_23",
+        "isOpen": true,
+        "id": "door24_west"
+      },
+      {
+        "to": "sector_25",
+        "isOpen": true,
+        "id": "door24_north"
+      },
+      {
+        "to": "sector_27",
+        "isOpen": true,
+        "id": "door24_east"
+      },
+      {
+        "to": "sector_26",
+        "isOpen": true,
+        "id": "door24_secret"
+      }
+    ],
+    "drones": [
+      {
+        "type": "patrol"
+      }
+    ],
+    "lasers": 0,
+    "elevators": []
+  },
+  "sector_25": {
+    "id": "sector_25",
+    "name": "Cryo-Storage Apex Vault",
+    "desc": "Deep stasis apex vault. Houses Nexus Fragment I: Cryo-Stasis Shard upon the central stepped dais guarded by dual containment lasers.",
+    "exits": {
+      "north": null,
+      "south": "sector_24",
+      "east": null,
+      "west": null
+    },
+    "items": [
+      {
+        "name": "Nexus Fragment I: Cryo-Stasis Shard",
+        "type": "nexus_fragment",
+        "desc": "First core shard of the Orbital Transit Overmind.",
+        "x": 5.5,
+        "y": 5.5,
+        "z": 2.2
+      },
+      {
+        "name": "Cryo Medkit",
+        "type": "medkit",
+        "desc": "Trauma restorative kit.",
+        "x": 2,
+        "y": 9,
+        "z": 0
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw25_left",
+        "type": "toggle",
+        "x": 2,
+        "y": 4
+      },
+      {
+        "id": "sw25_right",
+        "type": "toggle",
+        "x": 9,
+        "y": 4
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_24",
+        "isOpen": true,
+        "id": "door25_south"
+      }
+    ],
+    "drones": [
+      {
+        "type": "turret"
+      },
+      {
+        "type": "security"
+      }
+    ],
+    "lasers": 2,
+    "elevators": []
+  },
+  "sector_26": {
+    "id": "sector_26",
+    "name": "Sub-Deck Maintenance Vent (SECRET)",
+    "desc": "Concealed sub-deck utility crawlspace. Contains the rare Blue Cryo-Keycard and high-capacity cells discarded by station engineers.",
+    "exits": {
+      "north": "sector_24",
+      "south": null,
+      "east": null,
+      "west": null
+    },
+    "items": [
+      {
+        "name": "Cryo-Engineering Blue Keycard",
+        "type": "keycard_blue",
+        "desc": "Grants level-1 clearance to locked station doors.",
+        "x": 3.5,
+        "y": 3.5,
+        "z": 0.8
+      },
+      {
+        "name": "Auxiliary Supercell",
+        "type": "energy_cell",
+        "desc": "High density battery.",
+        "x": 2,
+        "y": 2,
+        "z": 0
+      },
+      {
+        "name": "Auxiliary Supercell",
+        "type": "energy_cell",
+        "desc": "High density battery.",
+        "x": 5,
+        "y": 2,
+        "z": 0
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw26_log",
+        "type": "terminal",
+        "x": 5,
+        "y": 5
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_24",
+        "isOpen": true,
+        "id": "door26_north"
+      }
+    ],
+    "drones": [],
+    "lasers": 0,
+    "elevators": []
+  },
+  "sector_27": {
+    "id": "sector_27",
+    "name": "Cargo Chute Bypass (SHORTCUT)",
+    "desc": "High-level pneumatic express chute. Pull the interlock lever to permanently unlock a direct shortcut back into the Core Nexus Hub mezzanine!",
+    "exits": {
+      "north": null,
+      "south": null,
+      "east": "sector_00",
+      "west": "sector_24"
+    },
+    "items": [
+      {
+        "name": "Chute Pressure Cell",
+        "type": "energy_cell",
+        "desc": "Industrial power cell.",
+        "x": 6,
+        "y": 4,
+        "z": 2.2
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw27_shortcut",
+        "type": "toggle",
+        "x": 4.5,
+        "y": 3.5
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_24",
+        "isOpen": true,
+        "id": "door27_west"
+      },
+      {
+        "to": "sector_00",
+        "isOpen": true,
+        "id": "door27_east"
+      }
+    ],
+    "drones": [],
+    "lasers": 0,
+    "elevators": []
+  },
+  "sector_28": {
+    "id": "sector_28",
+    "name": "Plasma Distribution Junction",
+    "desc": "High-voltage plasma conduit junction. Pulsating floor conduits and magnetic transformers route energy across Wing C.",
+    "exits": {
+      "north": "sector_29",
+      "south": null,
+      "east": "sector_30",
+      "west": "sector_00"
+    },
+    "items": [
+      {
+        "name": "Plasma Shunt Cell",
+        "type": "energy_cell",
+        "desc": "Thermal charged plasma accumulator.",
+        "x": 2,
+        "y": 2,
+        "z": 0
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw28_plate",
+        "type": "pressure",
+        "x": 6,
+        "y": 4
+      },
+      {
+        "id": "sw28_diverter",
+        "type": "terminal",
+        "x": 9,
+        "y": 3
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_00",
+        "isOpen": true,
+        "id": "door28_west"
+      },
+      {
+        "to": "sector_29",
+        "isOpen": true,
+        "id": "door28_north"
+      },
+      {
+        "to": "sector_30",
+        "isOpen": true,
+        "id": "door28_east"
+      }
+    ],
+    "drones": [],
+    "lasers": 1,
+    "elevators": []
+  },
+  "sector_29": {
+    "id": "sector_29",
+    "name": "High Voltage Stepping Conduits",
+    "desc": "Elevated capacitor towers rising above open zero-resistance conduit channels. Time jumps across stepping blocks over live laser barriers.",
+    "exits": {
+      "north": "sector_31",
+      "south": "sector_28",
+      "east": null,
+      "west": null
+    },
+    "items": [
+      {
+        "name": "Reactor Coupler Cell",
+        "type": "energy_cell",
+        "desc": "Charged plasma cell.",
+        "x": 3,
+        "y": 2,
+        "z": 2.2
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw29_switch",
+        "type": "toggle",
+        "x": 6,
+        "y": 2
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_28",
+        "isOpen": true,
+        "id": "door29_south"
+      },
+      {
+        "to": "sector_31",
+        "isOpen": true,
+        "id": "door29_north"
+      },
+      {
+        "to": "sector_48",
+        "isOpen": true,
+        "id": "door29_secret_48"
+      }
+    ],
+    "drones": [],
+    "lasers": 1,
+    "elevators": []
+  },
+  "sector_30": {
+    "id": "sector_30",
+    "name": "Laser Reflection Relay Chamber",
+    "desc": "Optical laser sensor chamber. Push insulated ceramic mirror crates into the horizontal laser path to block the beam and unlock the north bulkhead.",
+    "exits": {
+      "north": "sector_31",
+      "south": null,
+      "east": null,
+      "west": "sector_28"
+    },
+    "items": [
+      {
+        "name": "Radiation Burn Kit",
+        "type": "medkit",
+        "desc": "Specialized thermal restorative.",
+        "x": 10,
+        "y": 2,
+        "z": 0
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw30_plate",
+        "type": "pressure",
+        "x": 6,
+        "y": 9
+      },
+      {
+        "id": "sw30_term",
+        "type": "terminal",
+        "x": 2,
+        "y": 2
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_28",
+        "isOpen": true,
+        "id": "door30_west"
+      },
+      {
+        "to": "sector_31",
+        "isOpen": true,
+        "id": "door30_north"
+      }
+    ],
+    "drones": [],
+    "lasers": 1,
+    "elevators": []
+  },
+  "sector_31": {
+    "id": "sector_31",
+    "name": "Electromagnetic Elevator Core",
+    "desc": "Twin alternating electromagnetic elevators ascending and descending in anti-phase. Leap between moving lifts to scale the north reactor gantry. Secret hatch under the south pit leads to the Capacitor Cache.",
+    "exits": {
+      "north": "sector_32",
+      "south": "sector_29",
+      "east": "sector_30",
+      "west": "sector_34"
+    },
+    "items": [
+      {
+        "name": "Tachyon Cell",
+        "type": "energy_cell",
+        "desc": "High-discharge power cell.",
+        "x": 10,
+        "y": 10,
+        "z": 0
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw31_mag",
+        "type": "terminal",
+        "x": 6.5,
+        "y": 2
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_29",
+        "isOpen": true,
+        "id": "door31_south"
+      },
+      {
+        "to": "sector_30",
+        "isOpen": true,
+        "id": "door31_east"
+      },
+      {
+        "to": "sector_32",
+        "isOpen": true,
+        "id": "door31_north"
+      },
+      {
+        "to": "sector_34",
+        "isOpen": true,
+        "id": "door31_west"
+      },
+      {
+        "to": "sector_33",
+        "isOpen": true,
+        "id": "door31_secret"
+      }
+    ],
+    "drones": [
+      {
+        "type": "patrol"
+      }
+    ],
+    "lasers": 0,
+    "elevators": [
+      "elev31_a",
+      "elev31_b"
+    ]
+  },
+  "sector_32": {
+    "id": "sector_32",
+    "name": "The Reactor Core Heart",
+    "desc": "The superheated core heart of Station Zenith. Push both coolant dampening blocks onto receptor plates to extinguish the plasma containment laser grid and secure Nexus Fragment II.",
+    "exits": {
+      "north": null,
+      "south": "sector_31",
+      "east": null,
+      "west": null
+    },
+    "items": [
+      {
+        "name": "Nexus Fragment II: Fusion Core Torus",
+        "type": "nexus_fragment",
+        "desc": "Second core shard of the Orbital Transit Overmind.",
+        "x": 6.5,
+        "y": 6.5,
+        "z": 2.8
+      },
+      {
+        "name": "Reactor Supercell",
+        "type": "energy_cell",
+        "desc": "Overcharged core capacitor.",
+        "x": 2,
+        "y": 2,
+        "z": 0
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw32_plate1",
+        "type": "pressure",
+        "x": 3,
+        "y": 6
+      },
+      {
+        "id": "sw32_plate2",
+        "type": "pressure",
+        "x": 10,
+        "y": 6
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_31",
+        "isOpen": true,
+        "id": "door32_south"
+      }
+    ],
+    "drones": [
+      {
+        "type": "flying_sentinel"
+      },
+      {
+        "type": "turret"
+      },
+      {
+        "type": "security"
+      }
+    ],
+    "lasers": 2,
+    "elevators": []
+  },
+  "sector_33": {
+    "id": "sector_33",
+    "name": "Overcharged Capacitor Cache (SECRET)",
+    "desc": "Sub-reactor thermal sanctuary. Hidden under the electromagnetic elevator shaft, this chamber stores the Red Authorization Keycard and high-capacity cells.",
+    "exits": {
+      "north": "sector_31",
+      "south": null,
+      "east": null,
+      "west": null
+    },
+    "items": [
+      {
+        "name": "Reactor Authorization Red Keycard",
+        "type": "keycard_red",
+        "desc": "Grants level-2 security clearance for reactor systems.",
+        "x": 3.5,
+        "y": 3.5,
+        "z": 0.8
+      },
+      {
+        "name": "Tachyon Hypercell",
+        "type": "energy_cell",
+        "desc": "Provides massive auxiliary power.",
+        "x": 2,
+        "y": 2,
+        "z": 0
+      },
+      {
+        "name": "Tachyon Hypercell",
+        "type": "energy_cell",
+        "desc": "Provides massive auxiliary power.",
+        "x": 5,
+        "y": 2,
+        "z": 0
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw33_term",
+        "type": "terminal",
+        "x": 5,
+        "y": 5
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_31",
+        "isOpen": true,
+        "id": "door33_north"
+      }
+    ],
+    "drones": [],
+    "lasers": 0,
+    "elevators": []
+  },
+  "sector_34": {
+    "id": "sector_34",
+    "name": "High-Energy Service Conduit (SHORTCUT)",
+    "desc": "Overhead reactor exhaust service gantry. Operating the manual bypass wheel permanently unlocks the blast bulkhead directly into the Core Nexus Hub East Balcony!",
+    "exits": {
+      "north": null,
+      "south": null,
+      "east": "sector_31",
+      "west": "sector_00"
+    },
+    "items": [
+      {
+        "name": "Conduit Power Cell",
+        "type": "energy_cell",
+        "desc": "Thermal capacitor cell.",
+        "x": 3,
+        "y": 4,
+        "z": 2.2
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw34_shortcut",
+        "type": "toggle",
+        "x": 4.5,
+        "y": 3.5
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_31",
+        "isOpen": true,
+        "id": "door34_east"
+      },
+      {
+        "to": "sector_00",
+        "isOpen": true,
+        "id": "door34_west"
+      }
+    ],
+    "drones": [],
+    "lasers": 0,
+    "elevators": []
+  },
+  "sector_35": {
+    "id": "sector_35",
+    "name": "Cargo Stacking Testing Facility",
+    "desc": "Automated hydraulic proving ground. Stack freight crates atop one another to bypass the elevated optical tripwires and reach the high observation deck.",
+    "exits": {
+      "north": "sector_23",
+      "south": "sector_36",
+      "east": null,
+      "west": null
+    },
+    "items": [
+      {
+        "name": "Stacking Proving Cell",
+        "type": "energy_cell",
+        "desc": "Recovered from observation deck.",
+        "x": 9,
+        "y": 5,
+        "z": 2
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw35_dual",
+        "type": "pressure",
+        "x": 7,
+        "y": 5
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_23",
+        "isOpen": true,
+        "id": "door35_north"
+      },
+      {
+        "to": "sector_36",
+        "isOpen": false,
+        "id": "door35_south"
+      }
+    ],
+    "drones": [],
+    "lasers": 2,
+    "elevators": []
+  },
+  "sector_36": {
+    "id": "sector_36",
+    "name": "Dual-Mass Hydraulic Crucible",
+    "desc": "Deep stabilization chamber. Two separate heavy hydraulic pressure pads require calibrated dual-tier freight stacks to release the magnetic security seal.",
+    "exits": {
+      "north": "sector_35",
+      "south": "sector_37",
+      "east": null,
+      "west": null
+    },
+    "items": [
+      {
+        "name": "Crucible Security Token",
+        "type": "keycard_blue",
+        "desc": "Unlocks restricted containment doors.",
+        "x": 10,
+        "y": 1,
+        "z": 1
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw36_left",
+        "type": "pressure",
+        "x": 3,
+        "y": 7
+      },
+      {
+        "id": "sw36_right",
+        "type": "pressure",
+        "x": 8,
+        "y": 7
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_35",
+        "isOpen": true,
+        "id": "door36_north"
+      },
+      {
+        "to": "sector_37",
+        "isOpen": false,
+        "id": "door36_south"
+      }
+    ],
+    "drones": [
+      {}
+    ],
+    "lasers": 0,
+    "elevators": []
+  },
+  "sector_37": {
+    "id": "sector_37",
+    "name": "High-Bay Vertical Stepper",
+    "desc": "Massive vertical shaft with tiered retaining walls. Build a 2-tier and 3-tier stepped cargo staircase to overcome the massive structural barricades.",
+    "exits": {
+      "north": "sector_36",
+      "south": "sector_38",
+      "east": "sector_45",
+      "west": null
+    },
+    "items": [
+      {
+        "name": "Nexus Core Shard Theta",
+        "type": "nexus_fragment",
+        "desc": "Fragment of station core.",
+        "x": 8,
+        "y": 10,
+        "z": 2
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw37_term",
+        "type": "terminal",
+        "x": 2,
+        "y": 3
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_36",
+        "isOpen": true,
+        "id": "door37_north"
+      },
+      {
+        "to": "sector_38",
+        "isOpen": true,
+        "id": "door37_south"
+      },
+      {
+        "to": "sector_45",
+        "isOpen": true,
+        "id": "door37_secret_45"
+      }
+    ],
+    "drones": [],
+    "lasers": 0,
+    "elevators": []
+  },
+  "sector_38": {
+    "id": "sector_38",
+    "name": "Laser Interception Gantry",
+    "desc": "Dual-frequency optical grid corridor. Standard crates only block the ground beam; you must stack two crates to occlude both upper and lower laser arrays simultaneously!",
+    "exits": {
+      "north": "sector_37",
+      "south": "sector_39",
+      "east": null,
+      "west": null
+    },
+    "items": [
+      {
+        "name": "Shielded Power Cell",
+        "type": "energy_cell",
+        "desc": "Harvested behind optical barrier.",
+        "x": 1,
+        "y": 10,
+        "z": 0
+      }
+    ],
+    "switches": [],
+    "doors": [
+      {
+        "to": "sector_37",
+        "isOpen": true,
+        "id": "door38_north"
+      },
+      {
+        "to": "sector_39",
+        "isOpen": true,
+        "id": "door38_south"
+      }
+    ],
+    "drones": [],
+    "lasers": 4,
+    "elevators": []
+  },
+  "sector_39": {
+    "id": "sector_39",
+    "name": "Magnetic Freight Balancer",
+    "desc": "Precision magnetic balancing vault. Distribute calibrated weight stacks across 3 separate sensor nodes to disarm the central security field.",
+    "exits": {
+      "north": "sector_38",
+      "south": "sector_40",
+      "east": null,
+      "west": null
+    },
+    "items": [
+      {
+        "name": "Mag-Lev Supercell",
+        "type": "energy_cell",
+        "desc": "High density capacitor.",
+        "x": 6,
+        "y": 11,
+        "z": 0
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw39_left",
+        "type": "pressure",
+        "x": 3,
+        "y": 9
+      },
+      {
+        "id": "sw39_right",
+        "type": "pressure",
+        "x": 9,
+        "y": 9
+      },
+      {
+        "id": "sw39_center",
+        "type": "toggle",
+        "x": 6,
+        "y": 6
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_38",
+        "isOpen": true,
+        "id": "door39_north"
+      },
+      {
+        "to": "sector_40",
+        "isOpen": false,
+        "id": "door39_south"
+      }
+    ],
+    "drones": [
+      {}
+    ],
+    "lasers": 0,
+    "elevators": []
+  },
+  "sector_40": {
+    "id": "sector_40",
+    "name": "Cryo-Crate Logistics Sorter",
+    "desc": "Sub-zero automated sorting deck. Navigate refrigerated slipways and stack heavy cargo to bridge across frozen conduits.",
+    "exits": {
+      "north": "sector_39",
+      "south": "sector_41",
+      "east": null,
+      "west": null
+    },
+    "items": [
+      {
+        "name": "Cryogenic Fuel Cell",
+        "type": "energy_cell",
+        "desc": "Refrigerated cell.",
+        "x": 10,
+        "y": 10,
+        "z": 0
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw40_plate",
+        "type": "pressure",
+        "x": 6,
+        "y": 6
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_39",
+        "isOpen": true,
+        "id": "door40_north"
+      },
+      {
+        "to": "sector_41",
+        "isOpen": false,
+        "id": "door40_south"
+      }
+    ],
+    "drones": [],
+    "lasers": 1,
+    "elevators": []
+  },
+  "sector_41": {
+    "id": "sector_41",
+    "name": "Pneumatic Column Press",
+    "desc": "Massive hydraulic stamping pit. Stack three crates into a vertical column to trigger the high-overhead laser interlock sensor.",
+    "exits": {
+      "north": "sector_40",
+      "south": "sector_42",
+      "east": null,
+      "west": null
+    },
+    "items": [
+      {
+        "name": "Nexus Fragment Iota",
+        "type": "nexus_fragment",
+        "desc": "Pneumatically sealed fragment.",
+        "x": 1,
+        "y": 1,
+        "z": 1
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw41_plate",
+        "type": "pressure",
+        "x": 6,
+        "y": 6
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_40",
+        "isOpen": true,
+        "id": "door41_north"
+      },
+      {
+        "to": "sector_42",
+        "isOpen": false,
+        "id": "door41_south"
+      }
+    ],
+    "drones": [],
+    "lasers": 1,
+    "elevators": []
+  },
+  "sector_42": {
+    "id": "sector_42",
+    "name": "Overhead Concourse Mezzanine",
+    "desc": "Sprawling high-bay concourse with suspended gantry walkways. Build multi-tiered stepping formations to climb to the elevated catwalks.",
+    "exits": {
+      "north": "sector_41",
+      "south": "sector_43",
+      "east": null,
+      "west": null
+    },
+    "items": [
+      {
+        "name": "Gantry Supercell",
+        "type": "energy_cell",
+        "desc": "High altitude power storage.",
+        "x": 2,
+        "y": 11,
+        "z": 2
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw42_catwalk",
+        "type": "toggle",
+        "x": 6,
+        "y": 11
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_41",
+        "isOpen": true,
+        "id": "door42_north"
+      },
+      {
+        "to": "sector_43",
+        "isOpen": true,
+        "id": "door42_south"
+      }
+    ],
+    "drones": [
+      {}
+    ],
+    "lasers": 0,
+    "elevators": []
+  },
+  "sector_43": {
+    "id": "sector_43",
+    "name": "Dual-Beam Deflection Vault",
+    "desc": "Synchronized laser containment grid. Use mobile crate stacks as physical ray-shields to occlude crossing beams while avoiding patrolling defense drones.",
+    "exits": {
+      "north": "sector_42",
+      "south": "sector_44",
+      "east": null,
+      "west": null
+    },
+    "items": [
+      {
+        "name": "Deflection Crystal Cell",
+        "type": "energy_cell",
+        "desc": "Power core with optical prism.",
+        "x": 11,
+        "y": 11,
+        "z": 0
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw43_plate",
+        "type": "pressure",
+        "x": 6,
+        "y": 8
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_42",
+        "isOpen": true,
+        "id": "door43_north"
+      },
+      {
+        "to": "sector_44",
+        "isOpen": false,
+        "id": "door43_south"
+      }
+    ],
+    "drones": [
+      {},
+      {}
+    ],
+    "lasers": 3,
+    "elevators": []
+  },
+  "sector_44": {
+    "id": "sector_44",
+    "name": "Apex Stacking Colosseum",
+    "desc": "Grand master proving arena. Solve the ultimate stacking trial: position multiple 2-tier and 3-tier columns to activate all quadrant nodes and unlock Archival Vault Zero.",
+    "exits": {
+      "north": "sector_43",
+      "south": null,
+      "east": "sector_49",
+      "west": null
+    },
+    "items": [
+      {
+        "name": "Grand Nexus Fragment Omega",
+        "type": "nexus_fragment",
+        "desc": "The grand prize of the Colosseum.",
+        "x": 7,
+        "y": 11,
+        "z": 0
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw44_node1",
+        "type": "pressure",
+        "x": 4,
+        "y": 9
+      },
+      {
+        "id": "sw44_node2",
+        "type": "pressure",
+        "x": 9,
+        "y": 9
+      },
+      {
+        "id": "sw44_term",
+        "type": "terminal",
+        "x": 7,
+        "y": 7
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_43",
+        "isOpen": true,
+        "id": "door44_north"
+      },
+      {
+        "to": "sector_49",
+        "isOpen": true,
+        "id": "door44_east_secret"
+      }
+    ],
+    "drones": [
+      {},
+      {}
+    ],
+    "lasers": 0,
+    "elevators": []
+  },
+  "sector_45": {
+    "id": "sector_45",
+    "name": "Sub-Vault Maintenance Nook (SECRET)",
+    "desc": "Uncataloged sub-deck crawlspace discovered by stacking freight containers up to the high ventilation shafts in Sector 37.",
+    "exits": {
+      "north": null,
+      "south": null,
+      "east": null,
+      "west": "sector_37"
+    },
+    "items": [
+      {
+        "name": "Nexus Fragment Epsilon",
+        "type": "nexus_fragment",
+        "desc": "Recovered from hidden maintenance nook.",
+        "x": 7,
+        "y": 4,
+        "z": 1
+      },
+      {
+        "name": "Zenith Supercell",
+        "type": "energy_cell",
+        "desc": "Overcharged station cell.",
+        "x": 3,
+        "y": 6,
+        "z": 0
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw45_term",
+        "type": "terminal",
+        "x": 4,
+        "y": 6
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_37",
+        "isOpen": true,
+        "id": "door45_west"
+      }
+    ],
+    "drones": [],
+    "lasers": 0,
+    "elevators": []
+  },
+  "sector_46": {
+    "id": "sector_46",
+    "name": "Cryo-Depot Hidden Catacomb (SECRET)",
+    "desc": "Ancient cryogenic reserve chamber hidden behind the upper ventilation grilles of Deep Cryo Warehouse Sector 10. Stacked crates allowed access.",
+    "exits": {
+      "north": null,
+      "south": null,
+      "east": null,
+      "west": "sector_10"
+    },
+    "items": [
+      {
+        "name": "Nexus Shard Zeta",
+        "type": "nexus_fragment",
+        "desc": "Preserved in sub-zero cryo freeze.",
+        "x": 8,
+        "y": 8,
+        "z": 1
+      },
+      {
+        "name": "Cryo Supercell",
+        "type": "energy_cell",
+        "desc": "High-density cryo battery.",
+        "x": 2,
+        "y": 7,
+        "z": 0
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw46_term",
+        "type": "terminal",
+        "x": 5,
+        "y": 2
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_10",
+        "isOpen": true,
+        "id": "door46_west"
+      }
+    ],
+    "drones": [],
+    "lasers": 0,
+    "elevators": []
+  },
+  "sector_47": {
+    "id": "sector_47",
+    "name": "Decommissioned Drone Foundry (SECRET)",
+    "desc": "Mothballed sentinel assembly facility. Bypassed via a crate-stacking bridge over the high security barricade in Sector 18.",
+    "exits": {
+      "north": "sector_18",
+      "south": null,
+      "east": null,
+      "west": null
+    },
+    "items": [
+      {
+        "name": "Nexus Core Shard Eta",
+        "type": "nexus_fragment",
+        "desc": "Foundry central processing shard.",
+        "x": 5,
+        "y": 5,
+        "z": 1
+      },
+      {
+        "name": "Heavy Pulse Cell",
+        "type": "energy_cell",
+        "desc": "Sentinel power bank.",
+        "x": 2,
+        "y": 8,
+        "z": 0
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw47_term",
+        "type": "terminal",
+        "x": 5,
+        "y": 6
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_18",
+        "isOpen": true,
+        "id": "door47_north"
+      }
+    ],
+    "drones": [],
+    "lasers": 0,
+    "elevators": []
+  },
+  "sector_48": {
+    "id": "sector_48",
+    "name": "Plasma Conductor Void (SECRET)",
+    "desc": "Unshielded energetic pocket reached by stacking crates as stepping platforms up the High Voltage Stepping Conduits of Sector 29.",
+    "exits": {
+      "north": null,
+      "south": null,
+      "east": null,
+      "west": "sector_29"
+    },
+    "items": [
+      {
+        "name": "Plasma Supercell Alpha",
+        "type": "energy_cell",
+        "desc": "Overcharged capacitor.",
+        "x": 4,
+        "y": 4,
+        "z": 1
+      },
+      {
+        "name": "Plasma Supercell Beta",
+        "type": "energy_cell",
+        "desc": "Overcharged capacitor.",
+        "x": 8,
+        "y": 8,
+        "z": 2
+      },
+      {
+        "name": "Nexus Shard Lambda",
+        "type": "nexus_fragment",
+        "desc": "Conductor core shard.",
+        "x": 5,
+        "y": 5,
+        "z": 1
+      }
+    ],
+    "switches": [],
+    "doors": [
+      {
+        "to": "sector_29",
+        "isOpen": true,
+        "id": "door48_west"
+      }
+    ],
+    "drones": [],
+    "lasers": 0,
+    "elevators": []
+  },
+  "sector_49": {
+    "id": "sector_49",
+    "name": "Archival Vault Zero (SECRET)",
+    "desc": "The lost station data sanctum. Only accessible by building a 3-crate column to reach the highest observation grille in Sector 44.",
+    "exits": {
+      "north": null,
+      "south": null,
+      "east": null,
+      "west": "sector_44"
+    },
+    "items": [
+      {
+        "name": "Zenith Master Crest",
+        "type": "nexus_fragment",
+        "desc": "Golden station crest proving complete exploration.",
+        "x": 6,
+        "y": 6,
+        "z": 1
+      },
+      {
+        "name": "Overmind Zero Cell",
+        "type": "energy_cell",
+        "desc": "Infinite-cycle energy battery.",
+        "x": 8,
+        "y": 8,
+        "z": 0
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw49_term",
+        "type": "terminal",
+        "x": 5,
+        "y": 5
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_44",
+        "isOpen": true,
+        "id": "door49_west"
+      }
+    ],
+    "drones": [],
+    "lasers": 0,
+    "elevators": []
+  },
+  "sector_50": {
+    "id": "sector_50",
+    "name": "High-Catwalk Express (SHORTCUT)",
+    "desc": "High-level cargo conveyor catwalk unlocked by stacking crates to reach the overhead hatch in Sector 03. Connects Sector 03 directly to Sector 09!",
+    "exits": {
+      "north": null,
+      "south": "sector_03",
+      "east": "sector_09",
+      "west": null
+    },
+    "items": [
+      {
+        "name": "Express Line Battery",
+        "type": "energy_cell",
+        "desc": "Shortcut maintenance power.",
+        "x": 2,
+        "y": 2,
+        "z": 0
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw50_lever",
+        "type": "toggle",
+        "x": 5,
+        "y": 5
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_03",
+        "isOpen": true,
+        "id": "door50_south"
+      },
+      {
+        "to": "sector_09",
+        "isOpen": true,
+        "id": "door50_east"
+      }
+    ],
+    "drones": [],
+    "lasers": 0,
+    "elevators": []
+  },
+  "sector_51": {
+    "id": "sector_51",
+    "name": "Ventilation Bypass (SHORTCUT)",
+    "desc": "Wide pneumatic ventilation bypass. Opened by stacking 2 crates to clamber into the exhaust duct of Sector 06, leading straight into the Sector 13 Plasma Generator Hub!",
+    "exits": {
+      "north": null,
+      "south": null,
+      "east": "sector_06",
+      "west": "sector_13"
+    },
+    "items": [
+      {
+        "name": "Vent Sump Supercell",
+        "type": "energy_cell",
+        "desc": "Clean bypass battery.",
+        "x": 7,
+        "y": 2,
+        "z": 0
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw51_lever",
+        "type": "toggle",
+        "x": 5,
+        "y": 4
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_06",
+        "isOpen": true,
+        "id": "door51_east"
+      },
+      {
+        "to": "sector_13",
+        "isOpen": true,
+        "id": "door51_west"
+      }
+    ],
+    "drones": [],
+    "lasers": 0,
+    "elevators": []
+  },
+  "sector_52": {
+    "id": "sector_52",
+    "name": "Service Elevator Maintenance (SHORTCUT)",
+    "desc": "High-speed vertical express lift. Stack 2 crates in Sector 17 to bypass the blast shield, unlocking an instant elevator back to the Core Nexus Hub mezzanine!",
+    "exits": {
+      "north": "sector_17",
+      "south": "sector_00",
+      "east": null,
+      "west": null
+    },
+    "items": [
+      {
+        "name": "Nexus Express Power Core",
+        "type": "energy_cell",
+        "desc": "Master elevator supercell.",
+        "x": 2,
+        "y": 5,
+        "z": 0
+      }
+    ],
+    "switches": [
+      {
+        "id": "sw52_lever",
+        "type": "toggle",
+        "x": 5,
+        "y": 5
+      }
+    ],
+    "doors": [
+      {
+        "to": "sector_17",
+        "isOpen": true,
+        "id": "door52_north"
+      },
+      {
+        "to": "sector_00",
+        "isOpen": true,
+        "id": "door52_south"
+      }
+    ],
+    "drones": [],
+    "lasers": 0,
+    "elevators": []
+  }
+}

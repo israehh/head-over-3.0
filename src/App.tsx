@@ -5,6 +5,7 @@ import { Minimap } from './components/Minimap';
 import { RoomTransitionOverlay } from './components/RoomTransitionOverlay';
 import { PauseModal } from './components/PauseModal';
 import { PythonProjectModal } from './components/PythonProjectModal';
+import { WalkthroughModal } from './components/WalkthroughModal';
 import { EndGameModal } from './components/EndGameModal';
 import { GameEngine } from './engine/gameLoop';
 import { sound } from './audio/soundEffects';
@@ -27,6 +28,7 @@ export default function App() {
   const [isPauseOpen, setIsPauseOpen] = useState(false);
   const [pauseModalTab, setPauseModalTab] = useState<'map' | 'inventory' | 'objectives' | 'save' | 'settings'>('map');
   const [isPythonModalOpen, setIsPythonModalOpen] = useState(false);
+  const [isWalkthroughOpen, setIsWalkthroughOpen] = useState(false);
 
   // Setup Notification bridge from engine
   useEffect(() => {
@@ -117,6 +119,7 @@ export default function App() {
         onOpenMap={handleOpenMap}
         onQuickSave={handleQuickSave}
         onOpenPythonModal={() => setIsPythonModalOpen(true)}
+        onOpenWalkthrough={() => setIsWalkthroughOpen(true)}
         onRestart={handleRestart}
       />
 
@@ -184,6 +187,10 @@ export default function App() {
           setIsPauseOpen(false);
           setIsPythonModalOpen(true);
         }}
+        onOpenWalkthrough={() => {
+          setIsPauseOpen(false);
+          setIsWalkthroughOpen(true);
+        }}
         onRestart={handleRestart}
       />
 
@@ -193,11 +200,18 @@ export default function App() {
         onClose={() => setIsPythonModalOpen(false)}
       />
 
+      {/* Official Downloadable Walkthrough Modal */}
+      <WalkthroughModal
+        isOpen={isWalkthroughOpen}
+        onClose={() => setIsWalkthroughOpen(false)}
+      />
+
       {/* End Game / Victory Modal */}
       <EndGameModal
         engine={engine}
         onRestart={handleRestart}
         onOpenPythonModal={() => setIsPythonModalOpen(true)}
+        onOpenWalkthrough={() => setIsWalkthroughOpen(true)}
       />
     </div>
   );

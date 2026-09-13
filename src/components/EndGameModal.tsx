@@ -1,18 +1,20 @@
 import React, { useEffect } from 'react';
 import confetti from 'canvas-confetti';
-import { Award, Download, RotateCcw, Skull } from 'lucide-react';
+import { Award, BookOpen, Download, RotateCcw, Skull } from 'lucide-react';
 import { GameEngine } from '../engine/gameLoop';
 
 interface EndGameModalProps {
   engine: GameEngine;
   onRestart: () => void;
   onOpenPythonModal: () => void;
+  onOpenWalkthrough?: () => void;
 }
 
 export const EndGameModal: React.FC<EndGameModalProps> = ({
   engine,
   onRestart,
   onOpenPythonModal,
+  onOpenWalkthrough,
 }) => {
   const isVictory = engine.isVictory;
   const isGameOver = engine.isGameOver;
@@ -114,6 +116,17 @@ export const EndGameModal: React.FC<EndGameModalProps> = ({
             <Download className="w-4 h-4 text-indigo-400" />
             <span>Download Python / Pygame Project (.zip)</span>
           </button>
+
+          {onOpenWalkthrough && (
+            <button
+              id="endgame-walkthrough-btn"
+              onClick={onOpenWalkthrough}
+              className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-cyan-950/80 hover:bg-cyan-900/80 text-cyan-300 border border-cyan-700/60 text-xs font-mono font-semibold transition-colors"
+            >
+              <BookOpen className="w-4 h-4 text-cyan-400" />
+              <span>Descargar Guía Oficial / Walkthrough (PDF/TXT)</span>
+            </button>
+          )}
         </div>
       </div>
     </div>

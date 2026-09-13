@@ -2,6 +2,7 @@ import React from 'react';
 import {
   Activity,
   BatteryCharging,
+  BookOpen,
   Box,
   Compass,
   Download,
@@ -28,6 +29,7 @@ interface GameHUDProps {
   onOpenMap?: () => void;
   onQuickSave?: () => void;
   onOpenPythonModal: () => void;
+  onOpenWalkthrough?: () => void;
   onRestart: () => void;
 }
 
@@ -41,6 +43,7 @@ export const GameHUD: React.FC<GameHUDProps> = ({
   onOpenMap,
   onQuickSave,
   onOpenPythonModal,
+  onOpenWalkthrough,
   onRestart,
 }) => {
   const hasBlue = player.keycards.includes('BLUE') || player.keycards.includes('ALPHA');
@@ -115,6 +118,20 @@ export const GameHUD: React.FC<GameHUDProps> = ({
             <span className="hidden sm:inline">Python / Pygame</span>
             <span className="sm:hidden">Pygame</span>
           </button>
+
+          {/* Downloadable Walkthrough Guide Button */}
+          {onOpenWalkthrough && (
+            <button
+              id="hud-walkthrough-btn"
+              onClick={onOpenWalkthrough}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-cyan-900/90 hover:bg-cyan-800 text-cyan-200 border border-cyan-500/70 text-xs font-mono font-bold transition-all hover:scale-105 active:scale-95 shadow-lg shadow-cyan-950/50 animate-pulse"
+              title="Guía Oficial / Walkthrough Descargable (PDF / TXT)"
+            >
+              <BookOpen className="w-3.5 h-3.5 text-cyan-300" />
+              <span className="hidden sm:inline">Walkthrough</span>
+              <span className="sm:hidden">Guía</span>
+            </button>
+          )}
 
           {/* Control Mode Toggle */}
           <button

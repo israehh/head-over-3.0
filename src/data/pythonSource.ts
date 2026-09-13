@@ -1,3 +1,5 @@
+import { WALKTHROUGH_CONTENT_ES } from '../utils/walkthroughData';
+
 export interface PythonFileItem {
   path: string;
   category: 'core' | 'entities' | 'rooms' | 'systems' | 'maps' | 'root';
@@ -751,5 +753,11 @@ A modern 2.5D isometric puzzle-adventure game inspired by the 1987 classic *Head
 - **P / ESC**: Pause Menu
 - **F5 / F9**: Quick-Save / Quick-Load
 `,
+  },
+  {
+    path: 'WALKTHROUGH.md',
+    category: 'root',
+    description: 'Guía oficial completa y táctica descargable de todos los sectores, fragmentos y puzles.',
+    code: WALKTHROUGH_CONTENT_ES,
   },
 ];
