@@ -1,5 +1,6 @@
 import roomsJson from '../data/roomsNetwork.json';
 import { buildRoomGrid } from '../data/gridBuilder';
+import { EnemyAISystem } from './enemyAI';
 import {
   Direction,
   DoorEntity,
@@ -77,7 +78,9 @@ export function buildRoomsFromJson(): { [roomId: string]: RoomDefinition } {
       switches: JSON.parse(JSON.stringify(raw.switches || [])),
       doors: JSON.parse(JSON.stringify(raw.doors || [])),
       lasers: JSON.parse(JSON.stringify(raw.lasers || [])),
-      drones: JSON.parse(JSON.stringify(raw.drones || [])),
+      drones: (raw.drones || []).map((d: any) =>
+        EnemyAISystem.initEnemy(JSON.parse(JSON.stringify(d)), raw.id)
+      ),
       items: JSON.parse(JSON.stringify(raw.items || [])),
       teleporters: JSON.parse(JSON.stringify(raw.teleporters || [])),
       elevators: JSON.parse(JSON.stringify(raw.elevators || [])),

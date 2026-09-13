@@ -42,41 +42,51 @@ export class PuzzleSystem {
   ) {
     if (!room) return;
 
-    // 1. Evaluate Pressure Plates
+    // 1. Evaluate Pressure Plates (including Multi-Weight / Stacking Plates)
     for (const sw of room.switches) {
       if (sw.type === 'pressure') {
-        let isPressed = false;
+        const reqWeight = sw.requiredWeight || 1;
+        let currentWeight = 0;
 
-        // Player standing on plate
+        // Player standing on plate (weight = 1)
         if (
           distance2D(player.x, player.y, sw.x, sw.y) < 0.65 &&
           Math.abs(player.z - sw.z) < 0.4
         ) {
-          isPressed = true;
+          currentWeight += 1;
         }
 
-        // Crate resting on plate
-        if (!isPressed) {
-          for (const crate of room.crates) {
-            if (
-              distance2D(crate.x, crate.y, sw.x, sw.y) < 0.65 &&
-              Math.abs(crate.z - sw.z) < 0.5
-            ) {
-              isPressed = true;
-              break;
-            }
+        // Crates resting on plate or in stack directly above plate
+        for (const crate of room.crates) {
+          if (crate.isCarried) continue;
+          if (
+            distance2D(crate.x, crate.y, sw.x, sw.y) < 0.65 &&
+            crate.z >= sw.z - 0.25 &&
+            crate.z <= sw.z + 4.5
+          ) {
+            currentWeight += 1;
           }
         }
+
+        const isPressed = currentWeight >= reqWeight;
 
         if (isPressed !== sw.isActivated) {
           sw.isActivated = isPressed;
           sound.playSwitch();
 
           if (isPressed) {
-            notify?.(
-              `PRESSURE RELAY ENGAGED: [${sw.label || 'Auxiliary Switch'}] Weighted`,
-              'success'
-            );
+            if (reqWeight > 1) {
+              sound.playCrateStack();
+              notify?.(
+                `HYDRAULIC COUPLING ENGAGED: [${sw.label || 'Dual-Mass Plate'}] Full Weight Loaded (${currentWeight}/${reqWeight}t)`,
+                'success'
+              );
+            } else {
+              notify?.(
+                `PRESSURE RELAY ENGAGED: [${sw.label || 'Auxiliary Switch'}] Weighted`,
+                'success'
+              );
+            }
           }
 
           this.applySingleSwitchTargets(room, sw, isPressed, notify);
@@ -256,13 +266,42 @@ export class PuzzleSystem {
 
     // 3. Collision with other crates
     for (const other of room.crates) {
-      if (other.id === crate.id) continue;
+      if (other.id === crate.id || other.isCarried) continue;
       if (
         Math.round(other.x) === x &&
-        Math.round(other.y) === y &&
-        Math.abs(other.z - crate.z) < 0.5
+        Math.round(other.y) === y
       ) {
+        // Cannot push into another crate at same elevation or if an obstacle is stacked high there
+        if (Math.abs(other.z - crate.z) < 0.75 || other.z > crate.z) {
+          return false;
+        }
+      }
+    }
+
+    // Check if another crate is stacked on top of this crate
+    const stacked = room.crates.find(
+      (c) =>
+        c.id !== crate.id &&
+        !c.isCarried &&
+        Math.abs(c.x - crate.x) < 0.45 &&
+        Math.abs(c.y - crate.y) < 0.45 &&
+        c.z > crate.z &&
+        c.z <= crate.z + crate.h + 0.2
+    );
+    if (stacked) {
+      // The stacked crate also needs clearance at the destination tile
+      if (tile.elevation > stacked.z + 0.15) {
         return false;
+      }
+      for (const other of room.crates) {
+        if (other.id === crate.id || other.id === stacked.id || other.isCarried) continue;
+        if (
+          Math.round(other.x) === x &&
+          Math.round(other.y) === y &&
+          Math.abs(other.z - stacked.z) < 0.75
+        ) {
+          return false;
+        }
       }
     }
 

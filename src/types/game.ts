@@ -60,6 +60,7 @@ export interface PlayerState {
   keycards: string[]; // e.g. 'BLUE', 'RED', 'GREEN', 'ALPHA', 'BETA'
   energyCells: number;
   nexusFragments: number[]; // e.g. [1, 2, 3, 4, 5]
+  carriedCrate?: CrateEntity | null;
   walkFrame: number;
   invulnerableTimer: number;
   fallStartZ?: number;
@@ -89,6 +90,7 @@ export interface CrateEntity {
   color?: string;
   vz?: number;
   isFalling?: boolean;
+  isCarried?: boolean;
 }
 
 export interface SwitchEntity {
@@ -103,6 +105,7 @@ export interface SwitchEntity {
   targetElevatorId?: string;
   label?: string;
   puzzleTag?: string;
+  requiredWeight?: number; // Multi-weight mass requirement (e.g. 2 for stacked crates / dual mass)
 }
 
 export interface DoorEntity {
@@ -132,23 +135,86 @@ export interface LaserBarrier {
   switchId?: string;
 }
 
+export type EnemyType = 'patrol' | 'security' | 'turret' | 'sentinel' | 'guardian';
+export type EnemyAlertState = 'patrol' | 'suspicious' | 'search' | 'chase' | 'return';
+
+export interface EnemyWaypoint {
+  x: number;
+  y: number;
+  z?: number;
+  roomId?: string; // Multi-room patrol support
+  pauseTime?: number;
+}
+
 export interface PatrolDrone {
   id: string;
   x: number;
   y: number;
   z: number;
-  waypoints: { x: number; y: number }[];
+  waypoints: EnemyWaypoint[];
   currentWaypointIndex: number;
   speed: number;
   direction: Direction;
   damage: number;
   bobOffset: number;
-  type?: 'patrol' | 'guardian';
+  type?: EnemyType;
   detectionRadius?: number;
   isChasing?: boolean;
   chaseSpeed?: number;
   originX?: number;
   originY?: number;
+  originZ?: number;
+
+  // Advanced Enemy AI System
+  alertState?: EnemyAlertState;
+  alertLevel?: number; // 0.0 to 1.0
+  alertTimer?: number;
+  visionAngle?: number; // Current facing angle in radians
+  visionFov?: number; // Cone width in radians (e.g. 1.05 = ~60 deg)
+  visionRange?: number; // Max distance in tiles
+  lastKnownPos?: { x: number; y: number; z: number } | null;
+  searchTimer?: number;
+  searchDuration?: number;
+  sweepAngle?: number;
+  sweepDirection?: number; // 1 or -1
+  returnTarget?: { x: number; y: number; z?: number } | null;
+
+  // Elevator Navigation
+  ridingElevatorId?: string | null;
+  canUseElevator?: boolean;
+  targetElevatorZ?: number;
+  elevatorWaitTimer?: number;
+
+  // Multi-room patrol route tracking
+  multiRoomRoute?: boolean;
+  currentRoomId?: string;
+
+  // Turret & Projectile Attacks
+  attackCooldown?: number;
+  attackInterval?: number;
+  chargeTimer?: number;
+  isCharging?: boolean;
+  turretSweepArc?: number;
+  baseAngle?: number;
+  targetLockAngle?: number;
+  isActive?: boolean;
+}
+
+export interface EnemyProjectile {
+  id: string;
+  x: number;
+  y: number;
+  z: number;
+  vx: number;
+  vy: number;
+  vz: number;
+  damage: number;
+  color: string;
+  glowColor: string;
+  radius: number;
+  life: number;
+  maxLife: number;
+  sourceEnemyId: string;
 }
 
 export interface ItemCollectible {

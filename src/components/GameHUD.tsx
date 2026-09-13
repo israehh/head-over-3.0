@@ -2,6 +2,7 @@ import React from 'react';
 import {
   Activity,
   BatteryCharging,
+  Box,
   Compass,
   Download,
   Gem,
@@ -10,6 +11,7 @@ import {
   Pause,
   RotateCcw,
   Save,
+  ShieldAlert,
   Volume2,
   VolumeX,
   Zap,
@@ -273,6 +275,30 @@ export const GameHUD: React.FC<GameHUDProps> = ({
             <span className="font-bold">{player.energyCells}</span>
             <span className="text-slate-400 text-[10px]">CELLS</span>
           </div>
+
+          {/* Carried Crate Indicator */}
+          {player.carriedCrate && (
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-950/90 border border-blue-400 text-blue-200 text-xs font-mono animate-pulse shadow-[0_0_12px_rgba(56,189,248,0.5)]">
+              <Box className="w-3.5 h-3.5 text-blue-400" />
+              <span className="font-bold">CARGO CARRIED</span>
+              <span className="text-[10px] text-blue-300 hidden sm:inline">[C / E to Drop/Stack]</span>
+            </div>
+          )}
+
+          {/* Active AI Threat Level Warning */}
+          {room.drones?.some((d) => d.alertState === 'chase') && (
+            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-red-950/90 border border-red-500 text-red-300 text-xs font-mono animate-pulse shadow-[0_0_12px_rgba(239,68,68,0.5)]">
+              <ShieldAlert className="w-3.5 h-3.5 text-red-400" />
+              <span className="font-bold tracking-wider">PURSUIT ENGAGED</span>
+            </div>
+          )}
+          {!room.drones?.some((d) => d.alertState === 'chase') &&
+            room.drones?.some((d) => d.alertState === 'search' || d.alertState === 'alert') && (
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-950/90 border border-amber-500 text-amber-300 text-xs font-mono">
+                <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
+                <span className="font-bold tracking-wider">AREA SEARCH</span>
+              </div>
+            )}
         </div>
       </div>
     </div>

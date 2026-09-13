@@ -1,9 +1,10 @@
 import { RoomDefinition } from '../types/game';
 import { buildRoomsFromJson } from '../engine/roomNetwork';
 
-// Authoritative 20-room station network built dynamically from roomsNetwork.json
+// Authoritative 53-room station network built dynamically from roomsNetwork.json
 export const ALL_ROOMS: { [roomId: string]: RoomDefinition } = buildRoomsFromJson();
 
+export const SECTOR_00 = ALL_ROOMS['sector_00'];
 export const SECTOR_01 = ALL_ROOMS['sector_01'];
 export const SECTOR_02 = ALL_ROOMS['sector_02'];
 export const SECTOR_03 = ALL_ROOMS['sector_03'];
@@ -24,4 +25,36 @@ export const SECTOR_17 = ALL_ROOMS['sector_17'];
 export const SECTOR_18 = ALL_ROOMS['sector_18'];
 export const SECTOR_19 = ALL_ROOMS['sector_19'];
 export const SECTOR_20 = ALL_ROOMS['sector_20'];
+export const SECTOR_21 = ALL_ROOMS['sector_21'];
+export const SECTOR_22 = ALL_ROOMS['sector_22'];
+export const SECTOR_23 = ALL_ROOMS['sector_23'];
+export const SECTOR_24 = ALL_ROOMS['sector_24'];
+export const SECTOR_25 = ALL_ROOMS['sector_25'];
+export const SECTOR_26 = ALL_ROOMS['sector_26'];
+export const SECTOR_27 = ALL_ROOMS['sector_27'];
+export const SECTOR_28 = ALL_ROOMS['sector_28'];
+export const SECTOR_29 = ALL_ROOMS['sector_29'];
+export const SECTOR_30 = ALL_ROOMS['sector_30'];
+export const SECTOR_31 = ALL_ROOMS['sector_31'];
+export const SECTOR_32 = ALL_ROOMS['sector_32'];
+export const SECTOR_33 = ALL_ROOMS['sector_33'];
+export const SECTOR_34 = ALL_ROOMS['sector_34'];
+export const SECTOR_35 = ALL_ROOMS['sector_35'];
+export const SECTOR_36 = ALL_ROOMS['sector_36'];
+export const SECTOR_37 = ALL_ROOMS['sector_37'];
+export const SECTOR_38 = ALL_ROOMS['sector_38'];
+export const SECTOR_39 = ALL_ROOMS['sector_39'];
+export const SECTOR_40 = ALL_ROOMS['sector_40'];
+export const SECTOR_41 = ALL_ROOMS['sector_41'];
+export const SECTOR_42 = ALL_ROOMS['sector_42'];
+export const SECTOR_43 = ALL_ROOMS['sector_43'];
+export const SECTOR_44 = ALL_ROOMS['sector_44'];
+export const SECTOR_45 = ALL_ROOMS['sector_45'];
+export const SECTOR_46 = ALL_ROOMS['sector_46'];
+export const SECTOR_47 = ALL_ROOMS['sector_47'];
+export const SECTOR_48 = ALL_ROOMS['sector_48'];
+export const SECTOR_49 = ALL_ROOMS['sector_49'];
+export const SECTOR_50 = ALL_ROOMS['sector_50'];
+export const SECTOR_51 = ALL_ROOMS['sector_51'];
+export const SECTOR_52 = ALL_ROOMS['sector_52'];
 

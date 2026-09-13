@@ -133,7 +133,7 @@ export const PauseModal: React.FC<PauseModalProps> = ({
             }`}
           >
             <MapIcon className="w-3.5 h-3.5" />
-            <span>WORLD MAP (20)</span>
+            <span>WORLD MAP ({allRoomsList.length})</span>
           </button>
 
           <button

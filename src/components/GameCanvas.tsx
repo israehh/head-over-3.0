@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { GameEngine, InputState } from '../engine/gameLoop';
 import { renderer } from '../engine/renderer';
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Zap } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Box, Zap } from 'lucide-react';
 
 interface GameCanvasProps {
   engine: GameEngine;
@@ -23,6 +23,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ engine, onOpenPause }) =
     jump: false,
     run: false,
     interact: false,
+    carry: false,
   });
 
   // Detect mobile or touch capability
@@ -87,6 +88,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ engine, onOpenPause }) =
         case 'Enter':
           inputRef.current.interact = true;
           break;
+        case 'KeyC':
+          inputRef.current.carry = true;
+          break;
         case 'KeyP':
         case 'Escape':
           onOpenPause();
@@ -124,6 +128,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ engine, onOpenPause }) =
         case 'Enter':
           inputRef.current.interact = false;
           break;
+        case 'KeyC':
+          inputRef.current.carry = false;
+          break;
       }
     };
 
@@ -137,6 +144,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ engine, onOpenPause }) =
         jump: false,
         run: false,
         interact: false,
+        carry: false,
       };
     };
 
@@ -182,6 +190,7 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ engine, onOpenPause }) =
             room: engine.currentRoom,
             player: engine.player,
             particles: engine.particles,
+            projectiles: engine.projectiles,
             showGrid: engine.settings.showCoordinates,
           });
         }
@@ -225,7 +234,9 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ engine, onOpenPause }) =
         <span className="text-slate-600">|</span>
         <span className="text-cyan-400 font-bold">RUN:</span> Shift
         <span className="text-slate-600">|</span>
-        <span className="text-cyan-400 font-bold">INTERACT:</span> E / F
+        <span className="text-cyan-400 font-bold">LIFT/STACK CRATE:</span> C / E
+        <span className="text-slate-600">|</span>
+        <span className="text-cyan-400 font-bold">INTERACT:</span> Enter / F
       </div>
 
       {/* On-Screen Touch Gamepad Controls (For Mobile / Touch / Quick Click) */}
@@ -291,6 +302,19 @@ export const GameCanvas: React.FC<GameCanvasProps> = ({ engine, onOpenPause }) =
           >
             <Zap className="w-4 h-4 text-amber-400" />
             <span className="text-[9px] font-mono font-bold">RUN</span>
+          </button>
+
+          {/* Crate Lift/Drop Button */}
+          <button
+            id="touch-action-crate"
+            onPointerDown={() => (inputRef.current.carry = true)}
+            onPointerUp={() => (inputRef.current.carry = false)}
+            onPointerLeave={() => (inputRef.current.carry = false)}
+            className="w-12 h-12 flex flex-col items-center justify-center rounded-2xl bg-slate-800/90 hover:bg-slate-700 active:bg-blue-600 border border-slate-700 text-slate-200 active:text-white shadow-xl transition-colors"
+          >
+            <Box className="w-4 h-4 text-blue-400" />
+            <span className="text-[9px] font-mono font-bold text-blue-300">CRATE</span>
+            <span className="text-[8px] font-mono text-slate-400">[C]</span>
           </button>
 
           {/* Interact Button */}

@@ -2,6 +2,7 @@ import {
   CrateEntity,
   Direction,
   DoorEntity,
+  EnemyProjectile,
   ExitPortal,
   ItemCollectible,
   LaserBarrier,
@@ -26,12 +27,13 @@ interface RenderContext {
   room: RoomDefinition;
   player: PlayerState;
   particles: Particle[];
+  projectiles?: EnemyProjectile[];
   showGrid?: boolean;
 }
 
 export class IsometricRenderer {
   public render(params: RenderContext) {
-    const { ctx, canvasWidth, canvasHeight, cameraX, cameraY, zoom, time, room, player, particles } = params;
+    const { ctx, canvasWidth, canvasHeight, cameraX, cameraY, zoom, time, room, player, particles, projectiles } = params;
 
     // Clear background with deep space nebula gradient
     const bgGrad = ctx.createRadialGradient(
@@ -75,8 +77,16 @@ export class IsometricRenderer {
     // 5. Queue items
     this.queueItems(room.items, renderQueue, time);
 
-    // 6. Queue patrol drones
+    // 5.5 Queue Enemy Vision Cones (Floor projected)
+    this.queueVisionCones(room.drones, renderQueue, time);
+
+    // 6. Queue patrol drones & advanced enemies
     this.queueDrones(room.drones, renderQueue, time);
+
+    // 6.5 Queue Enemy Projectiles
+    if (projectiles && projectiles.length > 0) {
+      this.queueProjectiles(projectiles, renderQueue, time);
+    }
 
     // 7. Queue exit portal
     if (room.exitPortal) {
@@ -255,13 +265,32 @@ export class IsometricRenderer {
             const halfW = 20;
             const halfH = 10;
             const isDown = sw.isActivated;
+            const isHeavy = !!(sw.requiredWeight && sw.requiredWeight > 1);
 
             ctx.save();
+
+            // Extra outer hydraulic stabilizer ring if heavy multi-weight plate
+            if (isHeavy) {
+              ctx.beginPath();
+              ctx.ellipse(pos.x, pos.y + 2, halfW * 1.25, halfH * 1.25, 0, 0, Math.PI * 2);
+              ctx.fillStyle = '#090d16';
+              ctx.fill();
+              ctx.strokeStyle = isDown ? '#059669' : '#d97706';
+              ctx.lineWidth = 2.5;
+              ctx.stroke();
+
+              // Weight requirement readout
+              ctx.font = 'bold 7px JetBrains Mono, monospace';
+              ctx.fillStyle = isDown ? '#34d399' : '#fbbf24';
+              ctx.textAlign = 'center';
+              ctx.fillText(`${sw.requiredWeight}t DUAL-MASS`, pos.x, pos.y + 16);
+            }
+
             ctx.beginPath();
             ctx.ellipse(pos.x, pos.y, halfW, halfH, 0, 0, Math.PI * 2);
             ctx.fillStyle = '#0f172a';
             ctx.fill();
-            ctx.strokeStyle = isDown ? '#10b981' : '#f59e0b';
+            ctx.strokeStyle = isDown ? '#10b981' : isHeavy ? '#f59e0b' : '#f59e0b';
             ctx.lineWidth = 2;
             ctx.stroke();
 
@@ -544,8 +573,36 @@ export class IsometricRenderer {
           const ctx = (window as unknown as { __currentRenderCtx: CanvasRenderingContext2D }).__currentRenderCtx;
           if (!ctx) return;
 
+          // Calculate if any crate blocks this laser beam
+          let minT = 1.0;
+          let hitCrate: CrateEntity | null = null;
+          for (const crate of room.crates) {
+            if (crate.isCarried) continue;
+            if (laser.z >= crate.z - 0.15 && laser.z <= crate.z + crate.h + 0.15) {
+              const l2 = (laser.endX - laser.startX) ** 2 + (laser.endY - laser.startY) ** 2;
+              if (l2 > 0) {
+                let t =
+                  ((crate.x - laser.startX) * (laser.endX - laser.startX) +
+                    (crate.y - laser.startY) * (laser.endY - laser.startY)) /
+                  l2;
+                t = Math.max(0, Math.min(1, t));
+                const px = laser.startX + t * (laser.endX - laser.startX);
+                const py = laser.startY + t * (laser.endY - laser.startY);
+                const d = Math.hypot(crate.x - px, crate.y - py);
+                if (d < 0.65 && t < minT) {
+                  minT = t;
+                  hitCrate = crate;
+                }
+              }
+            }
+          }
+
+          const effectiveEndX = laser.startX + minT * (laser.endX - laser.startX);
+          const effectiveEndY = laser.startY + minT * (laser.endY - laser.startY);
+
           const p1 = worldToScreen(laser.startX, laser.startY, laser.z);
-          const p2 = worldToScreen(laser.endX, laser.endY, laser.z);
+          const p2 = worldToScreen(effectiveEndX, effectiveEndY, laser.z);
+          const fullEnd = worldToScreen(laser.endX, laser.endY, laser.z);
 
           // Pulsing laser beam
           const pulse = (Math.sin(time * 12) + 1) * 0.5;
@@ -567,8 +624,18 @@ export class IsometricRenderer {
           ctx.shadowBlur = 12;
           ctx.stroke();
 
-          // Emitter posts
-          [p1, p2].forEach((pt) => {
+          // If blocked by crate, draw impact sparks
+          if (hitCrate && minT < 0.98) {
+            ctx.fillStyle = '#fef08a';
+            ctx.shadowColor = '#f59e0b';
+            ctx.shadowBlur = 10;
+            ctx.beginPath();
+            ctx.arc(p2.x, p2.y, 4 + pulse * 2, 0, Math.PI * 2);
+            ctx.fill();
+          }
+
+          // Emitter posts (at original endpoints)
+          [p1, fullEnd].forEach((pt) => {
             ctx.fillStyle = '#475569';
             ctx.fillRect(pt.x - 3, pt.y - 8, 6, 8);
           });
@@ -732,7 +799,125 @@ export class IsometricRenderer {
   }
 
   // ----------------------------------------------------
-  // PATROL & GUARDIAN DRONES (Enemies)
+  // ADVANCED ENEMY AI: VISION CONES & SCAN ARCS
+  // ----------------------------------------------------
+  private queueVisionCones(
+    drones: PatrolDrone[],
+    queue: { depth: number; draw: () => void }[],
+    time: number
+  ) {
+    for (const drone of drones) {
+      // Vision cones are projected at floor level
+      const depth = (drone.x + drone.y) * 100 + 12;
+
+      queue.push({
+        depth,
+        draw: () => {
+          const ctx = (window as unknown as { __currentRenderCtx: CanvasRenderingContext2D }).__currentRenderCtx;
+          if (!ctx) return;
+
+          const fov = drone.visionFov || Math.PI * 0.4;
+          const range = drone.visionRange || 5.0;
+          const facing = drone.visionAngle ?? 0;
+          const state = drone.alertState || 'patrol';
+
+          // Center of enemy projected to floor plane (z = 0 or relative)
+          const apex = worldToScreen(drone.x, drone.y, 0.05);
+
+          // Sample arc points along FOV
+          const segments = 12;
+          const arcPoints: { x: number; y: number }[] = [];
+          const startAngle = facing - fov * 0.5;
+          const endAngle = facing + fov * 0.5;
+
+          for (let s = 0; s <= segments; s++) {
+            const angle = startAngle + (fov * s) / segments;
+            const wx = drone.x + Math.cos(angle) * range;
+            const wy = drone.y + Math.sin(angle) * range;
+            arcPoints.push(worldToScreen(wx, wy, 0.05));
+          }
+
+          ctx.save();
+
+          // Configure styling according to alert state
+          let fillCol = 'rgba(16, 185, 129, 0.12)';
+          let strokeCol = 'rgba(52, 211, 153, 0.45)';
+          let edgeGlow = 'rgba(16, 185, 129, 0.8)';
+
+          if (state === 'suspicious') {
+            const pulse = (Math.sin(time * 12) + 1) * 0.5;
+            fillCol = `rgba(245, 158, 11, ${0.16 + pulse * 0.12})`;
+            strokeCol = 'rgba(251, 191, 36, 0.75)';
+            edgeGlow = 'rgba(245, 158, 11, 0.9)';
+          } else if (state === 'search') {
+            fillCol = 'rgba(249, 115, 22, 0.2)';
+            strokeCol = 'rgba(251, 146, 60, 0.8)';
+            edgeGlow = 'rgba(249, 115, 22, 0.9)';
+          } else if (state === 'chase') {
+            const strobe = (Math.sin(time * 20) + 1) * 0.5;
+            fillCol = `rgba(239, 68, 68, ${0.22 + strobe * 0.16})`;
+            strokeCol = 'rgba(239, 68, 68, 0.95)';
+            edgeGlow = 'rgba(239, 68, 68, 1.0)';
+          }
+
+          // Render cone fan
+          ctx.beginPath();
+          ctx.moveTo(apex.x, apex.y);
+          for (const pt of arcPoints) {
+            ctx.lineTo(pt.x, pt.y);
+          }
+          ctx.closePath();
+
+          ctx.fillStyle = fillCol;
+          ctx.fill();
+
+          ctx.lineWidth = state === 'chase' ? 2.0 : 1.2;
+          ctx.strokeStyle = strokeCol;
+          ctx.stroke();
+
+          // Outer arc scanline pulse
+          ctx.beginPath();
+          if (arcPoints.length > 0) {
+            ctx.moveTo(arcPoints[0].x, arcPoints[0].y);
+            for (let i = 1; i < arcPoints.length; i++) {
+              ctx.lineTo(arcPoints[i].x, arcPoints[i].y);
+            }
+            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = edgeGlow;
+            ctx.stroke();
+          }
+
+          // Turret Laser Sight Beam
+          if (drone.type === 'turret') {
+            const beamDist = state === 'chase' ? range : range * 0.85;
+            const targetX = drone.x + Math.cos(facing) * beamDist;
+            const targetY = drone.y + Math.sin(facing) * beamDist;
+            const targetScreen = worldToScreen(targetX, targetY, 0.05);
+
+            ctx.beginPath();
+            ctx.moveTo(apex.x, apex.y - 12);
+            ctx.lineTo(targetScreen.x, targetScreen.y);
+            ctx.strokeStyle = state === 'chase' ? '#ef4444' : '#f59e0b';
+            ctx.lineWidth = state === 'chase' ? 2.0 : 1.0;
+            ctx.shadowColor = ctx.strokeStyle;
+            ctx.shadowBlur = state === 'chase' ? 8 : 4;
+            ctx.stroke();
+
+            // Laser target dot
+            ctx.beginPath();
+            ctx.arc(targetScreen.x, targetScreen.y, state === 'chase' ? 4 : 2.5, 0, Math.PI * 2);
+            ctx.fillStyle = ctx.strokeStyle;
+            ctx.fill();
+          }
+
+          ctx.restore();
+        },
+      });
+    }
+  }
+
+  // ----------------------------------------------------
+  // ADVANCED ENEMY AI: CHASSIS & OVERHEAD ALERTS
   // ----------------------------------------------------
   private queueDrones(
     drones: PatrolDrone[],
@@ -740,48 +925,182 @@ export class IsometricRenderer {
     time: number
   ) {
     for (const drone of drones) {
-      const bob = Math.sin(time * 5 + drone.bobOffset) * 4;
+      const isSentinel = drone.type === 'sentinel';
+      const isTurret = drone.type === 'turret';
+      const isSecurity = drone.type === 'security' || drone.type === 'guardian';
+      const bob = isTurret ? 0 : Math.sin(time * 5 + drone.bobOffset) * (isSentinel ? 6 : 4);
       const depth = (drone.x + drone.y) * 100 + drone.z * 10 + 40;
-      const isGuardian = drone.type === 'guardian';
-      const isChasing = drone.isChasing ?? false;
+      const state = drone.alertState || 'patrol';
+      const isChasing = state === 'chase';
 
       queue.push({
         depth,
         draw: () => {
           const ctx = (window as unknown as { __currentRenderCtx: CanvasRenderingContext2D }).__currentRenderCtx;
           if (!ctx) return;
+
           const pos = worldToScreen(drone.x, drone.y, drone.z);
           const py = pos.y + bob - 18;
 
           // Ground shadow
           const ground = worldToScreen(drone.x, drone.y, 0);
           ctx.beginPath();
-          ctx.ellipse(ground.x, ground.y, isGuardian ? 18 : 14, isGuardian ? 9 : 7, 0, 0, Math.PI * 2);
-          ctx.fillStyle = isChasing ? 'rgba(239, 68, 68, 0.4)' : 'rgba(0, 0, 0, 0.4)';
+          const shadowRadius = isSentinel ? 20 : isSecurity ? 18 : 14;
+          ctx.ellipse(ground.x, ground.y, shadowRadius, shadowRadius * 0.5, 0, 0, Math.PI * 2);
+          ctx.fillStyle = isChasing ? 'rgba(239, 68, 68, 0.45)' : 'rgba(0, 0, 0, 0.4)';
           ctx.fill();
 
           ctx.save();
-          if (isGuardian) {
-            // Aggressive Crimson Guardian Chassis
+
+          // ----------------------------------------------------
+          // 1. TURRET
+          // ----------------------------------------------------
+          if (isTurret) {
+            // Bolted base platform with hazard stripes
+            ctx.fillStyle = '#1e293b';
+            ctx.strokeStyle = '#475569';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.ellipse(pos.x, pos.y - 4, 16, 9, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Hazard chevrons on base
+            ctx.fillStyle = '#eab308';
+            ctx.fillRect(pos.x - 10, pos.y - 7, 4, 6);
+            ctx.fillRect(pos.x + 6, pos.y - 7, 4, 6);
+
+            // Rotating Armored Turret Dome
+            ctx.fillStyle = isChasing ? '#450a0a' : '#334155';
+            ctx.strokeStyle = isChasing ? '#ef4444' : '#94a3b8';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y - 14, 11, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Dual Heavy Laser Barrels pointing towards visionAngle
+            const angle = drone.visionAngle ?? 0;
+            const barrelLen = 14;
+            const bx = Math.cos(angle) * barrelLen;
+            const by = Math.sin(angle) * (barrelLen * 0.6);
+
+            ctx.lineWidth = 3.5;
+            ctx.strokeStyle = '#0f172a';
+            ctx.beginPath();
+            ctx.moveTo(pos.x - 3, pos.y - 14);
+            ctx.lineTo(pos.x - 3 + bx, pos.y - 14 + by);
+            ctx.moveTo(pos.x + 3, pos.y - 14);
+            ctx.lineTo(pos.x + 3 + bx, pos.y - 14 + by);
+            ctx.stroke();
+
+            // Central Core Sensor Eye
+            ctx.fillStyle = isChasing ? '#ef4444' : '#f59e0b';
+            ctx.shadowColor = ctx.fillStyle;
+            ctx.shadowBlur = isChasing ? 12 : 6;
+            ctx.beginPath();
+            ctx.arc(pos.x, pos.y - 14, 4, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            // Weapon Charging Glow
+            if (drone.isCharging) {
+              ctx.fillStyle = '#ef4444';
+              ctx.shadowColor = '#ef4444';
+              ctx.shadowBlur = 16;
+              ctx.beginPath();
+              ctx.arc(pos.x + bx, pos.y - 14 + by, 5 + Math.random() * 3, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.shadowBlur = 0;
+            }
+          }
+
+          // ----------------------------------------------------
+          // 2. FLYING SENTINEL
+          // ----------------------------------------------------
+          else if (isSentinel) {
+            // Aerodynamic triangular / hexagonal hull
+            ctx.fillStyle = '#0f172a';
+            ctx.strokeStyle = isChasing ? '#ef4444' : '#38bdf8';
+            ctx.lineWidth = 2;
+
+            ctx.beginPath();
+            ctx.moveTo(pos.x, py - 14);
+            ctx.lineTo(pos.x + 16, py + 4);
+            ctx.lineTo(pos.x, py + 8);
+            ctx.lineTo(pos.x - 16, py + 4);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            // Triple Anti-Gravity Hover Pods
+            const podOffset = Math.sin(time * 6) * 2;
+            ctx.fillStyle = '#1e293b';
+            ctx.strokeStyle = '#38bdf8';
+            ctx.lineWidth = 1.2;
+
+            // Left pod
+            ctx.beginPath();
+            ctx.ellipse(pos.x - 14, py + 3 + podOffset, 5, 3, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Right pod
+            ctx.beginPath();
+            ctx.ellipse(pos.x + 14, py + 3 + podOffset, 5, 3, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Rear pod
+            ctx.beginPath();
+            ctx.ellipse(pos.x, py - 12 - podOffset, 4, 3, 0, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // Ion Thruster Plumes (Cyan / Violet)
+            ctx.fillStyle = '#06b6d4';
+            ctx.shadowColor = '#06b6d4';
+            ctx.shadowBlur = 10;
+            ctx.fillRect(pos.x - 15, py + 7, 3, 6 + Math.random() * 5);
+            ctx.fillRect(pos.x + 12, py + 7, 3, 6 + Math.random() * 5);
+            ctx.shadowBlur = 0;
+
+            // Central Optic Core Sensor
+            const opticColor = isChasing ? '#ef4444' : '#00f2fe';
+            ctx.fillStyle = opticColor;
+            ctx.shadowColor = opticColor;
+            ctx.shadowBlur = 14;
+            ctx.beginPath();
+            ctx.arc(pos.x, py, 6, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+          }
+
+          // ----------------------------------------------------
+          // 3. SECURITY DRONE (High-speed pursuit unit)
+          // ----------------------------------------------------
+          else if (isSecurity) {
+            // Aggressive Crimson Armored Chassis
             ctx.fillStyle = '#450a0a';
             ctx.strokeStyle = isChasing ? '#ef4444' : '#f87171';
             ctx.lineWidth = 2;
             ctx.beginPath();
-            // Octagonal cyber fortress chassis
             ctx.arc(pos.x, py, 14, 0, Math.PI * 2);
             ctx.fill();
             ctx.stroke();
 
-            // Blinking Alert Beacon on top
-            const beaconColor = isChasing ? '#ff0033' : '#ea580c';
+            // Police emergency strobe beacon
+            const strobeToggle = Math.sin(time * 25) > 0;
+            const beaconColor = isChasing ? (strobeToggle ? '#ef4444' : '#3b82f6') : '#ea580c';
             ctx.fillStyle = beaconColor;
             ctx.shadowColor = beaconColor;
-            ctx.shadowBlur = isChasing ? 16 : 8;
+            ctx.shadowBlur = isChasing ? 18 : 8;
             ctx.beginPath();
-            ctx.arc(pos.x, py - 14, 4, 0, Math.PI * 2);
+            ctx.arc(pos.x, py - 14, 4.5, 0, Math.PI * 2);
             ctx.fill();
+            ctx.shadowBlur = 0;
 
-            // Hunter Sensor Eye
+            // Hunter Sensor Visor
             ctx.fillStyle = '#ef4444';
             ctx.beginPath();
             ctx.arc(pos.x, py, 6, 0, Math.PI * 2);
@@ -792,11 +1111,16 @@ export class IsometricRenderer {
             ctx.fillRect(pos.x - 20, py - 4, 6, 8);
             ctx.fillRect(pos.x + 14, py - 4, 6, 8);
 
-            // Thruster flames (high energy orange/red)
-            ctx.fillStyle = '#f97316';
-            ctx.fillRect(pos.x - 19, py + 4, 4, 5 + Math.random() * 5);
-            ctx.fillRect(pos.x + 15, py + 4, 4, 5 + Math.random() * 5);
-          } else {
+            // High Energy Thruster Flames
+            ctx.fillStyle = isChasing ? '#ef4444' : '#f97316';
+            ctx.fillRect(pos.x - 19, py + 4, 4, 5 + Math.random() * 6);
+            ctx.fillRect(pos.x + 15, py + 4, 4, 5 + Math.random() * 6);
+          }
+
+          // ----------------------------------------------------
+          // 4. PATROL DRONE (Standard security unit)
+          // ----------------------------------------------------
+          else {
             // Standard Patrol Drone Chassis (Hexagonal cyber sphere)
             ctx.fillStyle = '#334155';
             ctx.strokeStyle = '#e2e8f0';
@@ -806,7 +1130,7 @@ export class IsometricRenderer {
             ctx.fill();
             ctx.stroke();
 
-            // Rotating scanner eye (Red / Crimson warning)
+            // Rotating scanner eye
             ctx.fillStyle = '#ef4444';
             ctx.shadowColor = '#ef4444';
             ctx.shadowBlur = 12;
@@ -825,6 +1149,154 @@ export class IsometricRenderer {
             ctx.fillRect(pos.x - 17, py + 3, 4, 4 + Math.random() * 4);
             ctx.fillRect(pos.x + 13, py + 3, 4, 4 + Math.random() * 4);
           }
+
+          // ----------------------------------------------------
+          // OVERHEAD ALERT STATUS INDICATOR BADGE
+          // ----------------------------------------------------
+          if (state !== 'patrol') {
+            const badgeY = py - (isTurret ? 26 : 28);
+
+            if (state === 'suspicious') {
+              // Amber badge with '?'
+              ctx.fillStyle = '#f59e0b';
+              ctx.shadowColor = '#f59e0b';
+              ctx.shadowBlur = 8;
+              ctx.beginPath();
+              ctx.arc(pos.x, badgeY, 8, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.shadowBlur = 0;
+
+              // Alert Level progress ring
+              const progress = drone.alertLevel ?? 0;
+              ctx.beginPath();
+              ctx.arc(pos.x, badgeY, 11, -Math.PI * 0.5, -Math.PI * 0.5 + progress * Math.PI * 2);
+              ctx.strokeStyle = '#fbbf24';
+              ctx.lineWidth = 2.5;
+              ctx.stroke();
+
+              // Icon text
+              ctx.fillStyle = '#0f172a';
+              ctx.font = 'bold 11px sans-serif';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText('?', pos.x, badgeY);
+            } else if (state === 'search') {
+              // Orange badge with '!'
+              ctx.fillStyle = '#f97316';
+              ctx.shadowColor = '#f97316';
+              ctx.shadowBlur = 10;
+              ctx.beginPath();
+              ctx.arc(pos.x, badgeY, 9, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.shadowBlur = 0;
+
+              // Search radar sweep arc
+              const sweep = Math.sin(time * 8) * Math.PI;
+              ctx.beginPath();
+              ctx.arc(pos.x, badgeY, 13, sweep - 0.6, sweep + 0.6);
+              ctx.strokeStyle = '#fdba74';
+              ctx.lineWidth = 2;
+              ctx.stroke();
+
+              ctx.fillStyle = '#ffffff';
+              ctx.font = 'bold 12px sans-serif';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText('!', pos.x, badgeY);
+            } else if (state === 'chase') {
+              // Neon Red diamond with '!!'
+              ctx.fillStyle = '#ef4444';
+              ctx.shadowColor = '#ef4444';
+              ctx.shadowBlur = 14;
+
+              ctx.beginPath();
+              ctx.moveTo(pos.x, badgeY - 11);
+              ctx.lineTo(pos.x + 11, badgeY);
+              ctx.lineTo(pos.x, badgeY + 11);
+              ctx.lineTo(pos.x - 11, badgeY);
+              ctx.closePath();
+              ctx.fill();
+              ctx.shadowBlur = 0;
+
+              // Pulsing Danger Ring
+              const pulse = (Math.sin(time * 15) + 1) * 3;
+              ctx.beginPath();
+              ctx.arc(pos.x, badgeY, 13 + pulse, 0, Math.PI * 2);
+              ctx.strokeStyle = 'rgba(239, 68, 68, 0.7)';
+              ctx.lineWidth = 1.5;
+              ctx.stroke();
+
+              ctx.fillStyle = '#ffffff';
+              ctx.font = 'bold 10px sans-serif';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText('!!', pos.x, badgeY);
+            } else if (state === 'return') {
+              // Soft blue return chevron
+              ctx.fillStyle = 'rgba(56, 189, 248, 0.9)';
+              ctx.beginPath();
+              ctx.arc(pos.x, badgeY, 6, 0, Math.PI * 2);
+              ctx.fill();
+
+              ctx.fillStyle = '#ffffff';
+              ctx.font = 'bold 9px sans-serif';
+              ctx.textAlign = 'center';
+              ctx.textBaseline = 'middle';
+              ctx.fillText('⟲', pos.x, badgeY);
+            }
+          }
+
+          ctx.restore();
+        },
+      });
+    }
+  }
+
+  // ----------------------------------------------------
+  // ADVANCED ENEMY AI: PROJECTILES
+  // ----------------------------------------------------
+  private queueProjectiles(
+    projectiles: EnemyProjectile[],
+    queue: { depth: number; draw: () => void }[],
+    time: number
+  ) {
+    for (const p of projectiles) {
+      const depth = (p.x + p.y) * 100 + p.z * 10 + 42;
+
+      queue.push({
+        depth,
+        draw: () => {
+          const ctx = (window as unknown as { __currentRenderCtx: CanvasRenderingContext2D }).__currentRenderCtx;
+          if (!ctx) return;
+
+          const screenPos = worldToScreen(p.x, p.y, p.z);
+
+          ctx.save();
+          // Luminous Outer Glow
+          ctx.shadowColor = p.color;
+          ctx.shadowBlur = 14;
+
+          // Energy Bolt Core
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(screenPos.x, screenPos.y, 5, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Hot White Center
+          ctx.fillStyle = '#ffffff';
+          ctx.beginPath();
+          ctx.arc(screenPos.x, screenPos.y, 2.5, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Motion Streak Trail
+          ctx.beginPath();
+          const trailLength = 8;
+          ctx.moveTo(screenPos.x, screenPos.y);
+          ctx.lineTo(screenPos.x - p.vx * 1.5, screenPos.y - p.vy * 1.5);
+          ctx.strokeStyle = p.glowColor;
+          ctx.lineWidth = 3;
+          ctx.stroke();
+
           ctx.restore();
         },
       });
@@ -997,6 +1469,89 @@ export class IsometricRenderer {
         ctx.moveTo(5, -18 + walkBob);
         ctx.lineTo(7, -24 + walkBob);
         ctx.stroke();
+
+        // Advanced Crate Carrying: Render raised robotic arms, magnetic clamps, and carried crate
+        if (player.carriedCrate) {
+          ctx.strokeStyle = '#0284c7';
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(-6, -4 + walkBob);
+          ctx.lineTo(-12, -18 + walkBob);
+          ctx.lineTo(-9, -28 + walkBob);
+          ctx.stroke();
+
+          ctx.beginPath();
+          ctx.moveTo(6, -4 + walkBob);
+          ctx.lineTo(12, -18 + walkBob);
+          ctx.lineTo(9, -28 + walkBob);
+          ctx.stroke();
+
+          // Magnetic Clamps glowing cyan
+          ctx.fillStyle = '#38bdf8';
+          ctx.shadowColor = '#38bdf8';
+          ctx.shadowBlur = 8;
+          ctx.fillRect(-11, -30 + walkBob, 4, 4);
+          ctx.fillRect(7, -30 + walkBob, 4, 4);
+          ctx.shadowBlur = 0;
+
+          // Draw the Carried Crate hovering securely above the player's head
+          const crateY = -48 + walkBob;
+          const cw = 16;
+          const ch = 8;
+          const cDepth = 14;
+
+          // Isometric crate top face
+          ctx.beginPath();
+          ctx.moveTo(0, crateY - ch);
+          ctx.lineTo(cw, crateY);
+          ctx.lineTo(0, crateY + ch);
+          ctx.lineTo(-cw, crateY);
+          ctx.closePath();
+          ctx.fillStyle = '#64748b';
+          ctx.fill();
+          ctx.strokeStyle = '#38bdf8';
+          ctx.lineWidth = 1.2;
+          ctx.stroke();
+
+          // Left face
+          ctx.beginPath();
+          ctx.moveTo(-cw, crateY);
+          ctx.lineTo(0, crateY + ch);
+          ctx.lineTo(0, crateY + ch + cDepth);
+          ctx.lineTo(-cw, crateY + cDepth);
+          ctx.closePath();
+          ctx.fillStyle = '#475569';
+          ctx.fill();
+          ctx.stroke();
+
+          // Right face
+          ctx.beginPath();
+          ctx.moveTo(cw, crateY);
+          ctx.lineTo(0, crateY + ch);
+          ctx.lineTo(0, crateY + ch + cDepth);
+          ctx.lineTo(cw, crateY + cDepth);
+          ctx.closePath();
+          ctx.fillStyle = '#334155';
+          ctx.fill();
+          ctx.stroke();
+
+          // Magnetic flux field pulses between clamps and crate
+          const fluxPulse = (Math.sin(time * 16) + 1) * 0.5;
+          ctx.strokeStyle = `rgba(56, 189, 248, ${0.4 + fluxPulse * 0.4})`;
+          ctx.lineWidth = 1.5;
+          ctx.beginPath();
+          ctx.moveTo(-9, -28 + walkBob);
+          ctx.lineTo(-6, crateY + cDepth);
+          ctx.moveTo(9, -28 + walkBob);
+          ctx.lineTo(6, crateY + cDepth);
+          ctx.stroke();
+
+          // Floating mini badge
+          ctx.font = 'bold 6px JetBrains Mono, monospace';
+          ctx.fillStyle = '#38bdf8';
+          ctx.textAlign = 'center';
+          ctx.fillText('CARGO', 0, crateY + 1);
+        }
 
         // Jump thruster flame if jumping
         if (!player.isGrounded) {

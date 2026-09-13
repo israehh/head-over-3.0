@@ -5,12 +5,15 @@ import { PuzzleSystem } from './puzzleSystem';
 import {
   CrateEntity,
   Direction,
+  EnemyProjectile,
   GameSettings,
   Particle,
+  PatrolDrone,
   PlayerState,
   RoomDefinition,
 } from '../types/game';
 import { checkAABBCollision, distance2D } from './isometric';
+import { EnemyAISystem } from './enemyAI';
 
 export interface InputState {
   up: boolean;
@@ -20,6 +23,7 @@ export interface InputState {
   jump: boolean;
   run: boolean;
   interact: boolean;
+  carry?: boolean;
 }
 
 export class GameEngine {
@@ -28,6 +32,7 @@ export class GameEngine {
   public roomNetwork: RoomNetworkManager = roomNetwork;
   public player: PlayerState;
   public particles: Particle[] = [];
+  public projectiles: EnemyProjectile[] = [];
   public time: number = 0;
   public isPaused: boolean = false;
   public isGameOver: boolean = false;
@@ -45,6 +50,7 @@ export class GameEngine {
   public screenShake: number = 0;
   public lastInteractPressed: boolean = false;
   public lastJumpPressed: boolean = false;
+  public lastCarryPressed: boolean = false;
   public onNotification?: (message: string, type?: 'info' | 'success' | 'warn' | 'error') => void;
 
   constructor() {
@@ -69,6 +75,7 @@ export class GameEngine {
       maxEnergy: 100,
       keycards: [],
       nexusFragments: [],
+      carriedCrate: null,
       energyCells: 0,
       walkFrame: 0,
       invulnerableTimer: 0,
@@ -172,6 +179,7 @@ export class GameEngine {
 
     this.lastInteractPressed = input.interact;
     this.lastJumpPressed = input.jump;
+    this.lastCarryPressed = !!input.carry;
   }
 
   // ----------------------------------------------------
@@ -314,6 +322,7 @@ export class GameEngine {
 
     // Check collision with crates
     for (const crate of this.currentRoom.crates) {
+      if (crate.isCarried) continue;
       const crateBox = {
         x: crate.x - 0.5 * crate.w,
         y: crate.y - 0.5 * crate.d,
@@ -349,7 +358,7 @@ export class GameEngine {
     if (Math.abs(pushDirX) < 0.1 && Math.abs(pushDirY) < 0.1) return;
 
     for (const crate of this.currentRoom.crates) {
-      if (crate.isMoving) continue;
+      if (crate.isMoving || crate.isCarried) continue;
 
       const dist = distance2D(targetX, targetY, crate.x, crate.y);
       // If player is contacting this crate and at roughly the same elevation
@@ -373,6 +382,23 @@ export class GameEngine {
           crate.targetX = destX;
           crate.targetY = destY;
           crate.isMoving = true;
+
+          // If another crate is stacked on top of this crate, move the stack together!
+          const stacked = this.currentRoom.crates.find(
+            (c) =>
+              c.id !== crate.id &&
+              !c.isCarried &&
+              Math.abs(c.x - crate.x) < 0.45 &&
+              Math.abs(c.y - crate.y) < 0.45 &&
+              c.z > crate.z &&
+              c.z <= crate.z + crate.h + 0.2
+          );
+          if (stacked) {
+            stacked.targetX = destX;
+            stacked.targetY = destY;
+            stacked.isMoving = true;
+          }
+
           sound.playPushCrate();
           this.spawnDust(crate.x, crate.y, crate.z);
           break;
@@ -386,6 +412,8 @@ export class GameEngine {
 
     // 1. Move crates smoothly towards target position and simulate vertical gravity
     for (const crate of this.currentRoom.crates) {
+      if (crate.isCarried) continue;
+
       if (crate.isMoving && crate.targetX !== undefined && crate.targetY !== undefined) {
         const dx = crate.targetX - crate.x;
         const dy = crate.targetY - crate.y;
@@ -546,6 +574,7 @@ export class GameEngine {
 
     // Check if on top of any crate
     for (const crate of this.currentRoom.crates) {
+      if (crate.isCarried) continue;
       if (
         x >= crate.x - 0.48 * crate.w &&
         x <= crate.x + 0.48 * crate.w &&
@@ -589,7 +618,7 @@ export class GameEngine {
 
     // Check other crates below this crate
     for (const other of this.currentRoom.crates) {
-      if (other.id === crate.id) continue;
+      if (other.id === crate.id || other.isCarried) continue;
       if (
         Math.abs(crate.x - other.x) < 0.7 &&
         Math.abs(crate.y - other.y) < 0.7 &&
@@ -717,9 +746,12 @@ export class GameEngine {
   }
 
   // ----------------------------------------------------
-  // INTERACTION (Toggle switches, Terminals)
+  // INTERACTION (Toggle switches, Terminals, Crate Carry & Drop)
   // ----------------------------------------------------
   private handleInteractions(input: InputState) {
+    // Advanced Crate Handling (Carry, Drop, Stack)
+    this.handleCrateCarryAndDrop(input);
+
     if (input.interact && !this.lastInteractPressed) {
       // Find nearby interactive switch
       for (const sw of this.currentRoom.switches) {
@@ -739,74 +771,219 @@ export class GameEngine {
   }
 
   // ----------------------------------------------------
-  // PATROL & GUARDIAN DRONES AI
+  // ADVANCED CRATE SYSTEM: CARRY, DROP & STACKING
+  // ----------------------------------------------------
+  private handleCrateCarryAndDrop(input: InputState) {
+    // Keep carried crate synchronized with player position
+    if (this.player.carriedCrate) {
+      this.player.carriedCrate.x = this.player.x;
+      this.player.carriedCrate.y = this.player.y;
+      this.player.carriedCrate.z = this.player.z + 1.2;
+    }
+
+    const carryTriggered = !!input.carry && !this.lastCarryPressed;
+    const interactTriggered = input.interact && !this.lastInteractPressed;
+
+    if (!carryTriggered && !interactTriggered) return;
+
+    // CASE 1: ALREADY CARRYING A CRATE -> DROP OR STACK
+    if (this.player.carriedCrate) {
+      this.dropCarriedCrate();
+      return;
+    }
+
+    // CASE 2: NOT CARRYING A CRATE -> ATTEMPT PICK UP
+    // If interact was pressed, verify player isn't using a terminal/switch first
+    if (interactTriggered && !carryTriggered) {
+      const nearSwitch = this.currentRoom.switches.some(
+        (sw) =>
+          (sw.type === 'toggle' || sw.type === 'terminal') &&
+          distance2D(this.player.x, this.player.y, sw.x, sw.y) < 1.35
+      );
+      if (nearSwitch) return; // Prioritize switch interaction
+    }
+
+    // Search for closest topmost crate within pickup range
+    let bestCrate: CrateEntity | null = null;
+    let bestDist = 1.35;
+
+    for (const crate of this.currentRoom.crates) {
+      if (crate.isCarried) continue;
+      const d = distance2D(this.player.x, this.player.y, crate.x, crate.y);
+      const dz = Math.abs(this.player.z - crate.z);
+
+      if (d < bestDist && dz <= 1.4) {
+        // Crate must be topmost (no other crate resting on top)
+        const hasCrateOnTop = this.currentRoom.crates.some(
+          (other) =>
+            other.id !== crate.id &&
+            !other.isCarried &&
+            Math.abs(other.x - crate.x) < 0.5 &&
+            Math.abs(other.y - crate.y) < 0.5 &&
+            other.z > crate.z + 0.2
+        );
+
+        if (!hasCrateOnTop) {
+          bestCrate = crate;
+          bestDist = d;
+        }
+      }
+    }
+
+    if (bestCrate) {
+      this.pickUpCrate(bestCrate);
+    }
+  }
+
+  private pickUpCrate(crate: CrateEntity) {
+    crate.isCarried = true;
+    crate.isMoving = false;
+    crate.targetX = undefined;
+    crate.targetY = undefined;
+    crate.vz = 0;
+
+    // Remove from active room crates list while carried
+    this.currentRoom.crates = this.currentRoom.crates.filter((c) => c.id !== crate.id);
+    this.player.carriedCrate = crate;
+
+    crate.x = this.player.x;
+    crate.y = this.player.y;
+    crate.z = this.player.z + 1.2;
+
+    sound.playLiftCrate();
+    this.spawnDust(crate.x, crate.y, crate.z);
+    this.triggerNotify('CRATE LIFTED: Press [C] or [E] to Deploy / Stack Cargo', 'info');
+
+    // Re-evaluate puzzles immediately so pressure plates update
+    PuzzleSystem.updatePuzzles(this.currentRoom, this.player, this.triggerNotify.bind(this));
+  }
+
+  private dropCarriedCrate() {
+    const crate = this.player.carriedCrate;
+    if (!crate) return;
+
+    // Determine target drop tile in front of player based on facing direction
+    let dirX = 0;
+    let dirY = 0;
+    switch (this.player.direction) {
+      case 'E':
+      case 'SE':
+      case 'NE':
+        dirX = 1;
+        break;
+      case 'W':
+      case 'SW':
+      case 'NW':
+        dirX = -1;
+        break;
+    }
+    switch (this.player.direction) {
+      case 'S':
+      case 'SE':
+      case 'SW':
+        dirY = 1;
+        break;
+      case 'N':
+      case 'NE':
+      case 'NW':
+        dirY = -1;
+        break;
+    }
+
+    // Attempt front tile first
+    let dropX = Math.round(this.player.x + dirX);
+    let dropY = Math.round(this.player.y + dirY);
+
+    // If out of bounds or blocked by high wall, fallback to current player tile
+    const isOutOfBounds =
+      dropX <= 0 ||
+      dropX >= this.currentRoom.width - 1 ||
+      dropY <= 0 ||
+      dropY >= this.currentRoom.depth - 1;
+    const frontTile = !isOutOfBounds ? this.currentRoom.floorGrid[dropX]?.[dropY] : null;
+    const isFrontWall =
+      frontTile?.type === 'wall' && (frontTile.elevation || 2) > this.player.z + 1.0;
+
+    if (isOutOfBounds || isFrontWall) {
+      dropX = Math.round(this.player.x);
+      dropY = Math.round(this.player.y);
+    }
+
+    // Calculate surface height at drop location
+    const baseTile = this.currentRoom.floorGrid[dropX]?.[dropY];
+    let surfaceZ = baseTile?.elevation || 0;
+    let stackedOnCrate: CrateEntity | null = null;
+
+    // Check for existing crates at this tile to stack on top!
+    for (const other of this.currentRoom.crates) {
+      if (other.id === crate.id || other.isCarried) continue;
+      if (Math.abs(other.x - dropX) < 0.65 && Math.abs(other.y - dropY) < 0.65) {
+        const topOfOther = other.z + other.h;
+        if (topOfOther > surfaceZ) {
+          surfaceZ = topOfOther;
+          stackedOnCrate = other;
+        }
+      }
+    }
+
+    crate.x = dropX;
+    crate.y = dropY;
+    crate.z = surfaceZ;
+    crate.vz = 0;
+    crate.isMoving = false;
+    crate.targetX = undefined;
+    crate.targetY = undefined;
+    crate.isCarried = false;
+
+    this.currentRoom.crates.push(crate);
+    this.player.carriedCrate = null;
+
+    if (stackedOnCrate) {
+      sound.playCrateStack();
+      this.spawnSparks(dropX, dropY, surfaceZ);
+      this.triggerNotify(`CRATE STACKED: Elevation tier ${surfaceZ.toFixed(1)}m achieved`, 'success');
+    } else {
+      sound.playDropCrate();
+      this.spawnDust(dropX, dropY, surfaceZ);
+      this.triggerNotify('CRATE DEPLOYED: Placed on deck', 'info');
+    }
+
+    // Re-evaluate puzzles
+    PuzzleSystem.updatePuzzles(this.currentRoom, this.player, this.triggerNotify.bind(this));
+  }
+
+  // ----------------------------------------------------
+  // ADVANCED ENEMY AI SYSTEM
   // ----------------------------------------------------
   private updateDrones(dt: number) {
-    for (const drone of this.currentRoom.drones) {
-      if (drone.type === 'guardian') {
-        const distToPlayer = distance2D(drone.x, drone.y, this.player.x, this.player.y);
-        const detectionRadius = drone.detectionRadius || 5.5;
+    // 1. Update active enemy projectiles
+    EnemyAISystem.updateProjectiles(this.projectiles, dt, this.player, this.currentRoom, {
+      damagePlayer: (amt, sx, sy) => this.damagePlayer(amt, sx, sy),
+      triggerNotify: (msg, type) => this.triggerNotify(msg, type),
+      spawnSparks: (x, y, z) => this.spawnSparks(x, y, z),
+      spawnDust: (x, y, z) => this.spawnDust(x, y, z),
+    });
 
-        if (distToPlayer <= detectionRadius) {
-          // Alert and switch to chase mode
-          if (!drone.isChasing) {
-            drone.isChasing = true;
-            sound.playGuardianAlert();
-            this.triggerNotify('GUARDIAN DRONE: Intruder detected! Intercept protocol engaged!', 'warn');
-          }
-          // Move towards player
-          const dx = this.player.x - drone.x;
-          const dy = this.player.y - drone.y;
-          const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-          const speed = drone.chaseSpeed || 2.4;
-          drone.x += (dx / dist) * speed * dt;
-          drone.y += (dy / dist) * speed * dt;
-          drone.direction = this.calcDirection(dx, dy);
-        } else {
-          if (drone.isChasing) {
-            drone.isChasing = false;
-          }
-          // Resume standard patrol
-          const targetWaypoint = drone.waypoints[drone.currentWaypointIndex];
-          if (targetWaypoint) {
-            const dx = targetWaypoint.x - drone.x;
-            const dy = targetWaypoint.y - drone.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-
-            if (dist < 0.15) {
-              drone.currentWaypointIndex = (drone.currentWaypointIndex + 1) % drone.waypoints.length;
-            } else {
-              const moveDist = drone.speed * dt;
-              drone.x += (dx / dist) * moveDist;
-              drone.y += (dy / dist) * moveDist;
-              drone.direction = this.calcDirection(dx, dy);
-            }
-          }
+    // 2. Update each enemy with Advanced AI
+    const dronesCopy = [...this.currentRoom.drones];
+    for (const drone of dronesCopy) {
+      EnemyAISystem.updateEnemy(
+        drone,
+        dt,
+        this.player,
+        this.currentRoom,
+        this.roomsState,
+        this.projectiles,
+        {
+          damagePlayer: (amt, sx, sy) => this.damagePlayer(amt, sx, sy),
+          triggerNotify: (msg, type) => this.triggerNotify(msg, type),
+          spawnSparks: (x, y, z) => this.spawnSparks(x, y, z),
+          spawnDust: (x, y, z) => this.spawnDust(x, y, z),
+          onEnemyRoomTransition: (d, from, to) => {
+            this.triggerNotify(`SECURITY ALERT: ${d.type?.toUpperCase()} drone breached from ${from} into ${to}!`, 'warn');
+          },
         }
-      } else {
-        // Standard patrol drone
-        const targetWaypoint = drone.waypoints[drone.currentWaypointIndex];
-        if (targetWaypoint) {
-          const dx = targetWaypoint.x - drone.x;
-          const dy = targetWaypoint.y - drone.y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-
-          if (dist < 0.1) {
-            drone.currentWaypointIndex = (drone.currentWaypointIndex + 1) % drone.waypoints.length;
-          } else {
-            const moveDist = drone.speed * dt;
-            drone.x += (dx / dist) * moveDist;
-            drone.y += (dy / dist) * moveDist;
-            drone.direction = this.calcDirection(dx, dy);
-          }
-        }
-      }
-
-      // Check collision with player
-      const distToPlayer = distance2D(drone.x, drone.y, this.player.x, this.player.y);
-      if (distToPlayer < 0.8 && Math.abs(drone.z - this.player.z) < 1.0) {
-        this.damagePlayer(drone.damage, drone.x, drone.y);
-      }
+      );
     }
   }
 
@@ -888,24 +1065,71 @@ export class GameEngine {
   }
 
   // ----------------------------------------------------
-  // LASER COLLISION
+  // LASER COLLISION (With Crate & Stacking Occlusion)
   // ----------------------------------------------------
   private checkLaserCollisions() {
     for (const laser of this.currentRoom.lasers) {
       if (!laser.isActive) continue;
 
-      // Distance from player point to laser line segment
+      // Check if any crate in the room intercepts this laser beam between start and end
+      let minBlockT = 1.0;
+      for (const crate of this.currentRoom.crates) {
+        if (crate.isCarried) continue;
+        const dist = this.pointToSegmentDistance(
+          crate.x,
+          crate.y,
+          laser.startX,
+          laser.startY,
+          laser.endX,
+          laser.endY
+        );
+
+        // Does crate intersect horizontally and cover the laser's elevation?
+        if (dist < 0.65 && laser.z >= crate.z - 0.15 && laser.z <= crate.z + crate.h + 0.15) {
+          const l2 = (laser.endX - laser.startX) ** 2 + (laser.endY - laser.startY) ** 2;
+          if (l2 > 0) {
+            let t =
+              ((crate.x - laser.startX) * (laser.endX - laser.startX) +
+                (crate.y - laser.startY) * (laser.endY - laser.startY)) /
+              l2;
+            t = Math.max(0, Math.min(1, t));
+            if (t < minBlockT) {
+              minBlockT = t;
+            }
+          }
+        }
+      }
+
+      // Calculate player projection on laser line
+      const l2 = (laser.endX - laser.startX) ** 2 + (laser.endY - laser.startY) ** 2;
+      let playerT = 0;
+      if (l2 > 0) {
+        playerT =
+          ((this.player.x - laser.startX) * (laser.endX - laser.startX) +
+            (this.player.y - laser.startY) * (laser.endY - laser.startY)) /
+          l2;
+        playerT = Math.max(0, Math.min(1, playerT));
+      }
+
+      // If player is past the block point, laser cannot hit player!
+      if (playerT > minBlockT + 0.05) {
+        continue;
+      }
+
+      // Distance from player point to unblocked laser line segment
+      const effectiveEndX = laser.startX + minBlockT * (laser.endX - laser.startX);
+      const effectiveEndY = laser.startY + minBlockT * (laser.endY - laser.startY);
       const dist = this.pointToSegmentDistance(
         this.player.x,
         this.player.y,
         laser.startX,
         laser.startY,
-        laser.endX,
-        laser.endY
+        effectiveEndX,
+        effectiveEndY
       );
 
       if (dist < 0.45 && Math.abs(this.player.z - laser.z) < 0.8) {
-        this.damagePlayer(25, (laser.startX + laser.endX) / 2, (laser.startY + laser.endY) / 2);
+        this.damagePlayer(25, (laser.startX + effectiveEndX) / 2, (laser.startY + effectiveEndY) / 2);
       }
     }
   }
@@ -1037,20 +1261,44 @@ export class GameEngine {
     targetCoords: { x: number; y: number; z: number },
     direction?: Direction
   ) {
+    // Check if security drone was in hot pursuit
+    const pursuingDrone = this.currentRoom.drones.find(
+      (d) => (d.type === 'security' || d.type === 'guardian') && d.alertState === 'chase'
+    );
+
     // Unload previous room (snapshots state)
     this.roomNetwork.unloadRoom(this.currentRoom);
+
+    // Clear active projectiles for clean room transition
+    this.projectiles = [];
 
     // Load and activate new room
     this.currentRoom = nextRoom;
     this.player.x = targetCoords.x;
     this.player.y = targetCoords.y;
     this.player.z = targetCoords.z;
+    if (this.player.carriedCrate) {
+      this.player.carriedCrate.x = targetCoords.x;
+      this.player.carriedCrate.y = targetCoords.y;
+      this.player.carriedCrate.z = targetCoords.z + 1.2;
+    }
     if (direction) {
       this.player.direction = direction;
     }
     this.player.vx = 0;
     this.player.vy = 0;
     this.player.vz = 0;
+
+    // Multi-room pursuit: if Security drone was actively chasing, it follows through doorway
+    if (pursuingDrone) {
+      pursuingDrone.x = targetCoords.x - (direction === 'E' ? 1.5 : direction === 'W' ? -1.5 : 0);
+      pursuingDrone.y = targetCoords.y - (direction === 'S' ? 1.5 : direction === 'N' ? -1.5 : 0);
+      pursuingDrone.currentRoomId = nextRoom.id;
+      pursuingDrone.lastKnownPos = { x: targetCoords.x, y: targetCoords.y, z: targetCoords.z };
+      nextRoom.drones.push(pursuingDrone);
+      sound.playSecuritySiren();
+      this.triggerNotify(`SECURITY DRONE: Pursuit breached into ${nextRoom.name}!`, 'warn');
+    }
 
     // Immediately align camera to new player location to avoid visual jumps
     const target = this.calcPlayerScreen(this.player);
@@ -1062,6 +1310,9 @@ export class GameEngine {
 
     sound.playDoor();
     this.triggerNotify(`ENTERING: ${nextRoom.name}`, 'info');
+
+    // Automatic checkpoint save on entering room
+    this.saveGame(true);
   }
 
   // ----------------------------------------------------
@@ -1163,6 +1414,7 @@ export class GameEngine {
     this.player.energy = 100;
     this.player.keycards = [];
     this.player.nexusFragments = [];
+    this.player.carriedCrate = null;
     this.player.energyCells = 0;
     this.time = 0;
     this.isGameOver = false;
@@ -1178,7 +1430,7 @@ export class GameEngine {
     return localStorage.getItem('headoverheels2_save') !== null;
   }
 
-  public saveGame(): boolean {
+  public saveGame(silent: boolean = false): boolean {
     try {
       const state = {
         version: '2.0',
@@ -1190,11 +1442,15 @@ export class GameEngine {
         time: this.time,
       };
       localStorage.setItem('headoverheels2_save', JSON.stringify(state));
-      sound.playKeycardPickup();
-      this.triggerNotify('PROGRESS SAVED: Station State Secured in Memory Slot.', 'success');
+      if (!silent) {
+        sound.playKeycardPickup();
+        this.triggerNotify('PROGRESS SAVED: Station State Secured in Memory Slot.', 'success');
+      }
       return true;
     } catch {
-      this.triggerNotify('Failed to save station state.', 'error');
+      if (!silent) {
+        this.triggerNotify('Failed to save station state.', 'error');
+      }
       return false;
     }
   }
@@ -1212,10 +1468,18 @@ export class GameEngine {
       if (Array.isArray(data.discoveredRooms)) {
         this.roomNetwork.discoveredRooms = new Set(data.discoveredRooms);
       }
+      // Ensure full compatibility for all enemies across rooms
+      for (const rId of Object.keys(this.roomsState)) {
+        const r = this.roomsState[rId];
+        if (r && Array.isArray(r.drones)) {
+          r.drones = r.drones.map((d) => EnemyAISystem.initEnemy(d, r.id));
+        }
+      }
       this.currentRoom = this.roomNetwork.loadRoom(data.roomId || 'sector_01');
       this.player = data.player;
       if (!this.player.nexusFragments) this.player.nexusFragments = [];
       if (!this.player.keycards) this.player.keycards = [];
+      if (this.player.carriedCrate === undefined) this.player.carriedCrate = null;
       this.time = data.time || 0;
       this.isGameOver = false;
       this.isVictory = false;
@@ -1260,10 +1524,18 @@ export class GameEngine {
       if (Array.isArray(data.discoveredRooms)) {
         this.roomNetwork.discoveredRooms = new Set(data.discoveredRooms);
       }
+      // Ensure full compatibility for all enemies across rooms
+      for (const rId of Object.keys(this.roomsState)) {
+        const r = this.roomsState[rId];
+        if (r && Array.isArray(r.drones)) {
+          r.drones = r.drones.map((d) => EnemyAISystem.initEnemy(d, r.id));
+        }
+      }
       this.currentRoom = this.roomNetwork.loadRoom(data.roomId || 'sector_01');
       this.player = data.player;
       if (!this.player.nexusFragments) this.player.nexusFragments = [];
       if (!this.player.keycards) this.player.keycards = [];
+      if (this.player.carriedCrate === undefined) this.player.carriedCrate = null;
       this.time = data.time || 0;
       this.isGameOver = false;
       this.isVictory = false;

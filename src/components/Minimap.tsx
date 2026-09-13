@@ -65,14 +65,74 @@ export const Minimap: React.FC<MinimapProps> = ({ currentRoom, onSelectRoom, cla
   const allRooms = roomNetwork.roomsState;
   const totalRoomsCount = Object.keys(allRooms).length || 29;
 
-  // Station layout: Rows 0-4 = Sectors 1-20 (4 rooms each), Row 5 = Vertical Sector (9 rooms)
-  const rows = [
-    { cat: 'tutorial' as RoomCategory, label: '01. TUTORIAL', start: 1, count: 4 },
-    { cat: 'puzzle' as RoomCategory, label: '02. PUZZLE', start: 5, count: 4 },
-    { cat: 'storage' as RoomCategory, label: '03. STORAGE', start: 9, count: 4 },
-    { cat: 'energy' as RoomCategory, label: '04. ENERGY', start: 13, count: 4 },
-    { cat: 'security' as RoomCategory, label: '05. SECURITY', start: 17, count: 4 },
-    { cat: 'vertical' as RoomCategory, label: '06. VERTICAL (Z-AXIS)', start: 21, count: 9 },
+  // Station layout: Nexus Hub, Wings B & C, and Sectors 1-20
+  const rows: { cat: RoomCategory; label: string; subLabel: string; roomIds: string[] }[] = [
+    {
+      cat: 'vertical',
+      label: 'CORE NEXUS HUB',
+      subLabel: 'GRAND ATRIUM',
+      roomIds: ['sector_00'],
+    },
+    {
+      cat: 'storage',
+      label: 'WING B (CARGO & CRYO)',
+      subLabel: 'SECTORS 21–27',
+      roomIds: ['sector_21', 'sector_22', 'sector_23', 'sector_24', 'sector_25', 'sector_26', 'sector_27'],
+    },
+    {
+      cat: 'energy',
+      label: 'WING C (REACTOR & GRID)',
+      subLabel: 'SECTORS 28–34',
+      roomIds: ['sector_28', 'sector_29', 'sector_30', 'sector_31', 'sector_32', 'sector_33', 'sector_34'],
+    },
+    {
+      cat: 'puzzle',
+      label: 'WING D (STACKING YARDS)',
+      subLabel: 'SECTORS 35–44',
+      roomIds: ['sector_35', 'sector_36', 'sector_37', 'sector_38', 'sector_39', 'sector_40', 'sector_41', 'sector_42', 'sector_43', 'sector_44'],
+    },
+    {
+      cat: 'puzzle',
+      label: 'HIDDEN SECRET VAULTS',
+      subLabel: 'SECTORS 45–49',
+      roomIds: ['sector_45', 'sector_46', 'sector_47', 'sector_48', 'sector_49'],
+    },
+    {
+      cat: 'vertical',
+      label: 'EXPRESS BYPASS SHORTCUTS',
+      subLabel: 'SECTORS 50–52',
+      roomIds: ['sector_50', 'sector_51', 'sector_52'],
+    },
+    {
+      cat: 'tutorial',
+      label: '01. TUTORIAL',
+      subLabel: 'SECTORS 01–04',
+      roomIds: ['sector_01', 'sector_02', 'sector_03', 'sector_04'],
+    },
+    {
+      cat: 'puzzle',
+      label: '02. PUZZLE',
+      subLabel: 'SECTORS 05–08',
+      roomIds: ['sector_05', 'sector_06', 'sector_07', 'sector_08'],
+    },
+    {
+      cat: 'storage',
+      label: '03. STORAGE',
+      subLabel: 'SECTORS 09–12',
+      roomIds: ['sector_09', 'sector_10', 'sector_11', 'sector_12'],
+    },
+    {
+      cat: 'energy',
+      label: '04. ENERGY',
+      subLabel: 'SECTORS 13–16',
+      roomIds: ['sector_13', 'sector_14', 'sector_15', 'sector_16'],
+    },
+    {
+      cat: 'security',
+      label: '05. SECURITY',
+      subLabel: 'SECTORS 17–20',
+      roomIds: ['sector_17', 'sector_18', 'sector_19', 'sector_20'],
+    },
   ];
 
   const totalDiscovered = discovered.size;
@@ -106,22 +166,20 @@ export const Minimap: React.FC<MinimapProps> = ({ currentRoom, onSelectRoom, cla
       {/* Grid Layout of Station Rooms */}
       <div className="p-2.5 space-y-1.5 max-h-[360px] overflow-y-auto">
         {rows.map((rowInfo) => {
-          const roomNumbers = Array.from({ length: rowInfo.count }, (_, i) => rowInfo.start + i);
-          const gridColsClass = rowInfo.count > 4 ? (isExpanded ? 'grid-cols-5' : 'grid-cols-3') : 'grid-cols-4';
+          const gridColsClass = rowInfo.roomIds.length === 1 ? 'grid-cols-1' : rowInfo.roomIds.length > 4 ? (isExpanded ? 'grid-cols-7' : 'grid-cols-4') : 'grid-cols-4';
 
           return (
-            <div key={rowInfo.cat} className="space-y-0.5">
+            <div key={rowInfo.label} className="space-y-0.5">
               {isExpanded && (
                 <div className="text-[9px] uppercase tracking-wider text-slate-400 font-bold px-1 flex items-center justify-between">
                   <span>{rowInfo.label}</span>
                   <span className="text-[8px] text-slate-500">
-                    SECTORS {rowInfo.start}–{rowInfo.start + rowInfo.count - 1}
+                    {rowInfo.subLabel}
                   </span>
                 </div>
               )}
               <div className={`grid ${gridColsClass} gap-1.5`}>
-                {roomNumbers.map((roomNum) => {
-                  const roomId = `sector_${roomNum < 10 ? '0' + roomNum : roomNum}`;
+                {rowInfo.roomIds.map((roomId) => {
                   const room = allRooms[roomId];
                   const isCurrent = room?.id === currentRoom.id;
                   const isDiscovered = discovered.has(roomId);
@@ -180,11 +238,11 @@ export const Minimap: React.FC<MinimapProps> = ({ currentRoom, onSelectRoom, cla
                               isCurrent ? 'text-cyan-200' : colors.text
                             } ${isExpanded ? 'text-xs' : 'text-[10px]'}`}
                           >
-                            {roomNum < 10 ? `0${roomNum}` : roomNum}
+                            {room?.code || roomId.replace('sector_', 'S-')}
                           </span>
                           {isExpanded && (
                             <span className="text-[8px] text-slate-400 truncate max-w-[90%] text-center">
-                              {isCurrent ? '● ACTIVE' : room?.code || `S-${roomNum}`}
+                              {isCurrent ? '● ACTIVE' : room?.name || roomId}
                             </span>
                           )}
                           {isCurrent && (
