@@ -1,0 +1,447 @@
+import { RoomDefinition } from '../types/game';
+import { buildRoomGrid } from './gridBuilder';
+
+// ----------------------------------------------------
+// SECTOR 13: SECURITY CHECKPOINT
+// ----------------------------------------------------
+const s13Grid = buildRoomGrid({
+  width: 11,
+  depth: 11,
+  wallHeight: 2,
+  elevations: { '5,5': 1 },
+  doorOpenings: [
+    { x: 5, y: 10 },
+    { x: 10, y: 5 },
+    { x: 5, y: 0 },
+  ],
+});
+
+export const SECTOR_13: RoomDefinition = {
+  id: 'sector_13',
+  name: 'Sector 13: Security Checkpoint',
+  code: 'SEC-13',
+  quadrant: 'Delta: Security Bastion',
+  description: 'Armored blast gates regulating entrance into inner station sectors.',
+  width: 11,
+  depth: 11,
+  defaultPlayerSpawn: { x: 5, y: 9, z: 0, direction: 'N' },
+  floorGrid: s13Grid,
+  crates: [
+    { id: 'c13_1', x: 4, y: 4, z: 0, w: 1, d: 1, h: 1, isMoving: false },
+    { id: 'c13_2', x: 6, y: 4, z: 0, w: 1, d: 1, h: 1, isMoving: false },
+  ],
+  switches: [
+    {
+      id: 'sw13_term',
+      x: 8,
+      y: 8,
+      z: 0,
+      type: 'terminal',
+      isActivated: false,
+      targetLaserId: 'laser13_gate',
+      label: 'Checkpoint Override Console',
+    },
+  ],
+  doors: [
+    {
+      id: 'door13_south',
+      x: 5,
+      y: 10,
+      z: 0,
+      width: 1,
+      height: 2,
+      orientation: 'EW',
+      isOpen: true,
+      leadsToRoom: 'sector_08',
+      spawnCoords: { x: 5, y: 1.5, z: 0 },
+    },
+    {
+      id: 'door13_east',
+      x: 10,
+      y: 5,
+      z: 0,
+      width: 1,
+      height: 2,
+      orientation: 'NS',
+      isOpen: true,
+      leadsToRoom: 'sector_14',
+      spawnCoords: { x: 1.5, y: 5, z: 0 },
+    },
+    {
+      id: 'door13_north',
+      x: 5,
+      y: 0,
+      z: 0,
+      width: 1,
+      height: 2,
+      orientation: 'EW',
+      isOpen: false,
+      requiredKeycard: 'GREEN',
+      leadsToRoom: 'sector_17',
+      spawnCoords: { x: 5, y: 8.5, z: 0 },
+    },
+  ],
+  lasers: [
+    {
+      id: 'laser13_gate',
+      startX: 3,
+      startY: 2,
+      endX: 7,
+      endY: 2,
+      z: 0.5,
+      isActive: true,
+      switchId: 'sw13_term',
+    },
+  ],
+  drones: [],
+  items: [
+    {
+      id: 'item13_cell',
+      x: 5,
+      y: 5,
+      z: 1.2,
+      type: 'energy_cell',
+      isCollected: false,
+      name: 'Plasma Energy Cell',
+      description: 'Stabilizes orbital gravity regulators.',
+    },
+  ],
+  teleporters: [],
+  ambientColor: '#1a0b0b',
+  accentColor: '#ef4444',
+};
+
+// ----------------------------------------------------
+// SECTOR 14: DRONE ASSEMBLY LINE
+// ----------------------------------------------------
+const s14Grid = buildRoomGrid({
+  width: 11,
+  depth: 11,
+  wallHeight: 2,
+  elevations: { '3,5': 1, '7,5': 1 },
+  doorOpenings: [
+    { x: 0, y: 5 },
+    { x: 5, y: 10 },
+    { x: 10, y: 5 },
+  ],
+});
+
+export const SECTOR_14: RoomDefinition = {
+  id: 'sector_14',
+  name: 'Sector 14: Drone Assembly Line',
+  code: 'SEC-14',
+  quadrant: 'Delta: Security Bastion',
+  description: 'Automated fabrication line guarded by active patrol and hunter drones.',
+  width: 11,
+  depth: 11,
+  defaultPlayerSpawn: { x: 1.5, y: 5, z: 0, direction: 'E' },
+  floorGrid: s14Grid,
+  crates: [
+    { id: 'c14_cover', x: 5, y: 5, z: 0, w: 1, d: 1, h: 1, isMoving: false },
+  ],
+  switches: [],
+  doors: [
+    {
+      id: 'door14_west',
+      x: 0,
+      y: 5,
+      z: 0,
+      width: 1,
+      height: 2,
+      orientation: 'NS',
+      isOpen: true,
+      leadsToRoom: 'sector_13',
+      spawnCoords: { x: 9.5, y: 5, z: 0 },
+    },
+    {
+      id: 'door14_south',
+      x: 5,
+      y: 10,
+      z: 0,
+      width: 1,
+      height: 2,
+      orientation: 'EW',
+      isOpen: true,
+      leadsToRoom: 'sector_10',
+      spawnCoords: { x: 9.5, y: 5, z: 0 },
+    },
+    {
+      id: 'door14_east',
+      x: 10,
+      y: 5,
+      z: 0,
+      width: 1,
+      height: 2,
+      orientation: 'NS',
+      isOpen: false,
+      requiredKeycard: 'GREEN',
+      leadsToRoom: 'sector_15',
+      spawnCoords: { x: 1.5, y: 5, z: 0 },
+    },
+  ],
+  lasers: [],
+  drones: [
+    {
+      id: 'drone14_patrol',
+      x: 4,
+      y: 2,
+      z: 0.8,
+      waypoints: [
+        { x: 4, y: 2 },
+        { x: 7, y: 2 },
+        { x: 7, y: 8 },
+        { x: 4, y: 8 },
+      ],
+      currentWaypointIndex: 0,
+      speed: 1.4,
+      direction: 'E',
+      damage: 25,
+      bobOffset: 0.2,
+      type: 'patrol',
+    },
+    {
+      id: 'drone14_guardian',
+      x: 8,
+      y: 6,
+      z: 0.8,
+      waypoints: [
+        { x: 8, y: 6 },
+        { x: 9, y: 9 },
+      ],
+      currentWaypointIndex: 0,
+      speed: 1.3,
+      chaseSpeed: 2.5,
+      direction: 'W',
+      damage: 35,
+      bobOffset: 0.4,
+      type: 'guardian',
+      detectionRadius: 5.0,
+      isChasing: false,
+    },
+  ],
+  items: [
+    {
+      id: 'item14_cell',
+      x: 9,
+      y: 2,
+      z: 0.2,
+      type: 'energy_cell',
+      isCollected: false,
+      name: 'Plasma Energy Cell',
+      description: 'Stabilizes orbital gravity regulators.',
+    },
+    {
+      id: 'item14_medkit',
+      x: 2,
+      y: 9,
+      z: 0.2,
+      type: 'medkit',
+      isCollected: false,
+      name: 'Emergency Medkit',
+      description: 'Restores 40% hull integrity.',
+    },
+  ],
+  teleporters: [],
+  ambientColor: '#1c0c0c',
+  accentColor: '#f87171',
+};
+
+// ----------------------------------------------------
+// SECTOR 15: ARMORY VAULT
+// ----------------------------------------------------
+const s15Grid = buildRoomGrid({
+  width: 10,
+  depth: 10,
+  wallHeight: 2,
+  elevations: {
+    '4,4': 1,
+    '5,4': 1,
+    '4,5': 1,
+    '5,5': 1,
+  },
+  doorOpenings: [
+    { x: 0, y: 5 },
+    { x: 5, y: 0 },
+  ],
+});
+
+export const SECTOR_15: RoomDefinition = {
+  id: 'sector_15',
+  name: 'Sector 15: Armory Vault',
+  code: 'SEC-15',
+  quadrant: 'Delta: Security Bastion',
+  description: 'High-security weapon store. Use heavy crates to disrupt defense lasers and claim Fragment IV.',
+  width: 10,
+  depth: 10,
+  defaultPlayerSpawn: { x: 1.5, y: 5, z: 0, direction: 'E' },
+  floorGrid: s15Grid,
+  crates: [
+    { id: 'c15_1', x: 3, y: 3, z: 0, w: 1, d: 1, h: 1, isMoving: false },
+    { id: 'c15_2', x: 3, y: 7, z: 0, w: 1, d: 1, h: 1, isMoving: false },
+  ],
+  switches: [
+    {
+      id: 'sw15_plate',
+      x: 7,
+      y: 7,
+      z: 0,
+      type: 'pressure',
+      isActivated: false,
+      targetLaserId: 'laser15_vault',
+      label: 'Vault Pressure Mechanism',
+    },
+  ],
+  doors: [
+    {
+      id: 'door15_west',
+      x: 0,
+      y: 5,
+      z: 0,
+      width: 1,
+      height: 2,
+      orientation: 'NS',
+      isOpen: true,
+      leadsToRoom: 'sector_14',
+      spawnCoords: { x: 9.5, y: 5, z: 0 },
+    },
+    {
+      id: 'door15_north',
+      x: 5,
+      y: 0,
+      z: 0,
+      width: 1,
+      height: 2,
+      orientation: 'EW',
+      isOpen: true,
+      leadsToRoom: 'sector_18',
+      spawnCoords: { x: 5, y: 8.5, z: 0 },
+    },
+  ],
+  lasers: [
+    {
+      id: 'laser15_vault',
+      startX: 3.5,
+      startY: 4.5,
+      endX: 6.5,
+      endY: 4.5,
+      z: 1.2,
+      isActive: true,
+      switchId: 'sw15_plate',
+    },
+  ],
+  drones: [],
+  items: [
+    {
+      id: 'frag_04',
+      x: 4.5,
+      y: 4.5,
+      z: 1.3,
+      type: 'nexus_fragment',
+      fragmentId: 4,
+      isCollected: false,
+      name: 'Nexus Fragment IV (Cyber Matrix)',
+      description: 'Fourth of the 5 fragmented quantum crystals of the Overmind.',
+    },
+  ],
+  teleporters: [],
+  ambientColor: '#1f130b',
+  accentColor: '#10b981',
+};
+
+// ----------------------------------------------------
+// SECTOR 16: SURVEILLANCE ARRAY
+// ----------------------------------------------------
+const s16Grid = buildRoomGrid({
+  width: 10,
+  depth: 10,
+  wallHeight: 2,
+  elevations: {
+    '2,4': 1,
+    '3,4': 1,
+    '6,4': 1,
+    '7,4': 1,
+  },
+  doorOpenings: [
+    { x: 5, y: 0 },
+    { x: 0, y: 5 },
+  ],
+});
+
+export const SECTOR_16: RoomDefinition = {
+  id: 'sector_16',
+  name: 'Sector 16: Surveillance Array',
+  code: 'SEC-16',
+  quadrant: 'Delta: Security Bastion',
+  description: 'Long-range station sensors with rotating perimeter sweep beams.',
+  width: 10,
+  depth: 10,
+  defaultPlayerSpawn: { x: 5, y: 1.5, z: 0, direction: 'S' },
+  floorGrid: s16Grid,
+  crates: [
+    { id: 'c16_block', x: 5, y: 5, z: 0, w: 1, d: 1, h: 1, isMoving: false },
+  ],
+  switches: [
+    {
+      id: 'sw16_term',
+      x: 8,
+      y: 2,
+      z: 0,
+      type: 'terminal',
+      isActivated: false,
+      label: 'Sensor Calibration Console',
+    },
+  ],
+  doors: [
+    {
+      id: 'door16_north',
+      x: 5,
+      y: 0,
+      z: 0,
+      width: 1,
+      height: 2,
+      orientation: 'EW',
+      isOpen: true,
+      leadsToRoom: 'sector_12',
+      spawnCoords: { x: 5, y: 8, z: 0 },
+    },
+    {
+      id: 'door16_west',
+      x: 0,
+      y: 5,
+      z: 0,
+      width: 1,
+      height: 2,
+      orientation: 'NS',
+      isOpen: true,
+      leadsToRoom: 'sector_18',
+      spawnCoords: { x: 8, y: 5, z: 0 },
+    },
+  ],
+  lasers: [
+    {
+      id: 'laser16_sweep',
+      startX: 2,
+      startY: 7,
+      endX: 8,
+      endY: 7,
+      z: 0.5,
+      isActive: true,
+    },
+  ],
+  drones: [],
+  items: [
+    {
+      id: 'item16_cell',
+      x: 8,
+      y: 8,
+      z: 0.2,
+      type: 'energy_cell',
+      isCollected: false,
+      name: 'Plasma Energy Cell',
+      description: 'Stabilizes orbital gravity regulators.',
+    },
+  ],
+  teleporters: [],
+  ambientColor: '#170b17',
+  accentColor: '#a855f7',
+};

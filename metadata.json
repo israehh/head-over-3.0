@@ -1,0 +1,6 @@
+{
+  "name": "Head Over Heels 2.0 - Sci-Fi Reborn",
+  "description": "A modern 2.5D isometric puzzle-adventure game inspired by classic Head Over Heels, featuring interconnected space station sectors, 3D jumping, crate physics, patrol drones, keycards, and environmental puzzles.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

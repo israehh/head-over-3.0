@@ -1,0 +1,442 @@
+import { RoomDefinition } from '../types/game';
+import { buildRoomGrid } from './gridBuilder';
+
+// ----------------------------------------------------
+// SECTOR 05: DYNAMO MATRIX
+// ----------------------------------------------------
+const s05Grid = buildRoomGrid({
+  width: 11,
+  depth: 11,
+  wallHeight: 2,
+  elevations: {
+    '2,2': 1,
+    '3,2': 1,
+    '2,3': 1,
+    '3,3': 1,
+    '7,7': 1,
+    '8,7': 1,
+    '7,8': 1,
+    '8,8': 1,
+  },
+  doorOpenings: [
+    { x: 0, y: 5 },
+    { x: 5, y: 0 },
+    { x: 5, y: 10 },
+  ],
+});
+
+export const SECTOR_05: RoomDefinition = {
+  id: 'sector_05',
+  name: 'Sector 05: Dynamo Matrix',
+  code: 'SEC-05',
+  quadrant: 'Beta: Engineering Core',
+  description: 'High-voltage inductive reactors generating station power. Avoid drone sweeps.',
+  width: 11,
+  depth: 11,
+  defaultPlayerSpawn: { x: 1.5, y: 5, z: 0, direction: 'E' },
+  floorGrid: s05Grid,
+  crates: [
+    { id: 'c05_1', x: 4, y: 7, z: 0, w: 1, d: 1, h: 1, isMoving: false },
+  ],
+  switches: [
+    {
+      id: 'sw05_term',
+      x: 8,
+      y: 2,
+      z: 0,
+      type: 'terminal',
+      isActivated: false,
+      label: 'Turbine Synchronization',
+    },
+  ],
+  doors: [
+    {
+      id: 'door05_west',
+      x: 0,
+      y: 5,
+      z: 0,
+      width: 1,
+      height: 2,
+      orientation: 'NS',
+      isOpen: true,
+      leadsToRoom: 'sector_02',
+      spawnCoords: { x: 9.5, y: 4.5, z: 0 },
+    },
+    {
+      id: 'door05_south',
+      x: 5,
+      y: 10,
+      z: 0,
+      width: 1,
+      height: 2,
+      orientation: 'EW',
+      isOpen: true,
+      leadsToRoom: 'sector_06',
+      spawnCoords: { x: 5, y: 1.5, z: 0 },
+    },
+    {
+      id: 'door05_north',
+      x: 5,
+      y: 0,
+      z: 0,
+      width: 1,
+      height: 2,
+      orientation: 'EW',
+      isOpen: false,
+      requiredKeycard: 'BLUE',
+      leadsToRoom: 'sector_08',
+      spawnCoords: { x: 5, y: 8.5, z: 0 },
+    },
+  ],
+  lasers: [],
+  drones: [
+    {
+      id: 'drone05_1',
+      x: 5,
+      y: 3,
+      z: 0.8,
+      waypoints: [
+        { x: 5, y: 3 },
+        { x: 9, y: 3 },
+        { x: 9, y: 7 },
+        { x: 5, y: 7 },
+      ],
+      currentWaypointIndex: 0,
+      speed: 1.6,
+      direction: 'E',
+      damage: 30,
+      bobOffset: 0.3,
+      type: 'patrol',
+    },
+  ],
+  items: [
+    {
+      id: 'item05_cell',
+      x: 2.5,
+      y: 2.5,
+      z: 1.2,
+      type: 'energy_cell',
+      isCollected: false,
+      name: 'Plasma Energy Cell',
+      description: 'Stabilizes orbital gravity regulators.',
+    },
+  ],
+  teleporters: [],
+  ambientColor: '#1a130a',
+  accentColor: '#f59e0b',
+};
+
+// ----------------------------------------------------
+// SECTOR 06: PLASMA CONDUIT
+// ----------------------------------------------------
+const s06Grid = buildRoomGrid({
+  width: 11,
+  depth: 10,
+  wallHeight: 2,
+  elevations: { '5,4': 1, '5,5': 1 },
+  doorOpenings: [
+    { x: 0, y: 5 },
+    { x: 5, y: 0 },
+    { x: 10, y: 5 },
+  ],
+});
+
+export const SECTOR_06: RoomDefinition = {
+  id: 'sector_06',
+  name: 'Sector 06: Plasma Conduit',
+  code: 'SEC-06',
+  quadrant: 'Beta: Engineering Core',
+  description: 'Superheated energy pipes guarded by laser emitters. Push ceramic crates to cross.',
+  width: 11,
+  depth: 10,
+  defaultPlayerSpawn: { x: 1.5, y: 5, z: 0, direction: 'E' },
+  floorGrid: s06Grid,
+  crates: [
+    { id: 'c06_shield_crate', x: 3, y: 4, z: 0, w: 1, d: 1, h: 1, isMoving: false },
+    { id: 'c06_weight_crate', x: 7, y: 3, z: 0, w: 1, d: 1, h: 1, isMoving: false },
+  ],
+  switches: [
+    {
+      id: 'sw06_plate',
+      x: 8,
+      y: 7,
+      z: 0,
+      type: 'pressure',
+      isActivated: false,
+      targetLaserId: 'laser06_conduit',
+      label: 'Plasma Diverter Switch',
+    },
+  ],
+  doors: [
+    {
+      id: 'door06_west',
+      x: 0,
+      y: 5,
+      z: 0,
+      width: 1,
+      height: 2,
+      orientation: 'NS',
+      isOpen: true,
+      leadsToRoom: 'sector_04',
+      spawnCoords: { x: 8, y: 5, z: 0 },
+    },
+    {
+      id: 'door06_north',
+      x: 5,
+      y: 0,
+      z: 0,
+      width: 1,
+      height: 2,
+      orientation: 'EW',
+      isOpen: true,
+      leadsToRoom: 'sector_05',
+      spawnCoords: { x: 5, y: 9, z: 0 },
+    },
+    {
+      id: 'door06_east',
+      x: 10,
+      y: 5,
+      z: 0,
+      width: 1,
+      height: 2,
+      orientation: 'NS',
+      isOpen: true,
+      leadsToRoom: 'sector_10',
+      spawnCoords: { x: 1.5, y: 5, z: 0 },
+    },
+  ],
+  lasers: [
+    {
+      id: 'laser06_conduit',
+      startX: 6,
+      startY: 1,
+      endX: 6,
+      endY: 8,
+      z: 0.5,
+      isActive: true,
+      switchId: 'sw06_plate',
+    },
+  ],
+  drones: [],
+  items: [
+    {
+      id: 'item06_red_key',
+      x: 8.5,
+      y: 3,
+      z: 0.3,
+      type: 'keycard_red',
+      isCollected: false,
+      name: 'Red Security Keycard',
+      description: 'Authorizes passage into inner reactor and high-security sectors.',
+    },
+  ],
+  teleporters: [],
+  ambientColor: '#20100a',
+  accentColor: '#ef4444',
+};
+
+// ----------------------------------------------------
+// SECTOR 07: COOLING TANKS
+// ----------------------------------------------------
+const s07Grid = buildRoomGrid({
+  width: 10,
+  depth: 10,
+  wallHeight: 2,
+  elevations: {
+    '2,2': 1,
+    '3,2': 1,
+    '2,3': 1,
+    '3,3': 1,
+  },
+  doorOpenings: [{ x: 4, y: 9 }],
+});
+
+export const SECTOR_07: RoomDefinition = {
+  id: 'sector_07',
+  name: 'Sector 07: Cooling Tanks',
+  code: 'SEC-07',
+  quadrant: 'Beta: Engineering Core',
+  description: 'Cryogenic coolant tanks and pneumatic service elevator to the Sub-Zero lab.',
+  width: 10,
+  depth: 10,
+  defaultPlayerSpawn: { x: 4.5, y: 8, z: 0, direction: 'N' },
+  floorGrid: s07Grid,
+  crates: [
+    { id: 'c07_1', x: 6, y: 4, z: 0, w: 1, d: 1, h: 1, isMoving: false },
+  ],
+  switches: [
+    {
+      id: 'sw07_plate',
+      x: 7,
+      y: 7,
+      z: 0,
+      type: 'pressure',
+      isActivated: false,
+      label: 'Elevator Hydraulic Release',
+    },
+  ],
+  doors: [
+    {
+      id: 'door07_south',
+      x: 4.5,
+      y: 9,
+      z: 0,
+      width: 1,
+      height: 2,
+      orientation: 'EW',
+      isOpen: true,
+      leadsToRoom: 'sector_03',
+      spawnCoords: { x: 4.5, y: 1.5, z: 0 },
+    },
+  ],
+  elevators: [
+    {
+      id: 'elev07_to_11',
+      x: 8,
+      y: 2,
+      z: 0,
+      targetRoomId: 'sector_11',
+      targetX: 2,
+      targetY: 2,
+      targetZ: 0,
+      label: 'Cryo-Lift to Sector 11',
+    },
+  ],
+  lasers: [],
+  drones: [],
+  items: [
+    {
+      id: 'item07_cell',
+      x: 2.5,
+      y: 2.5,
+      z: 1.2,
+      type: 'energy_cell',
+      isCollected: false,
+      name: 'Plasma Energy Cell',
+      description: 'Stabilizes orbital gravity regulators.',
+    },
+    {
+      id: 'item07_medkit',
+      x: 2,
+      y: 7,
+      z: 0.2,
+      type: 'medkit',
+      isCollected: false,
+      name: 'Emergency Medkit',
+      description: 'Restores 40% hull integrity.',
+    },
+  ],
+  teleporters: [],
+  ambientColor: '#0a171f',
+  accentColor: '#38bdf8',
+};
+
+// ----------------------------------------------------
+// SECTOR 08: POWER DISTRIBUTION HUB
+// ----------------------------------------------------
+const s08Grid = buildRoomGrid({
+  width: 11,
+  depth: 11,
+  wallHeight: 2,
+  elevations: {
+    '5,5': 1,
+  },
+  doorOpenings: [
+    { x: 5, y: 10 },
+    { x: 10, y: 5 },
+    { x: 5, y: 0 },
+  ],
+});
+
+export const SECTOR_08: RoomDefinition = {
+  id: 'sector_08',
+  name: 'Sector 08: Power Distribution Hub',
+  code: 'SEC-08',
+  quadrant: 'Beta: Engineering Core',
+  description: 'Central switching junction routing power to all station quadrants.',
+  width: 11,
+  depth: 11,
+  defaultPlayerSpawn: { x: 5, y: 9, z: 0, direction: 'N' },
+  floorGrid: s08Grid,
+  crates: [
+    { id: 'c08_1', x: 3, y: 4, z: 0, w: 1, d: 1, h: 1, isMoving: false },
+    { id: 'c08_2', x: 7, y: 4, z: 0, w: 1, d: 1, h: 1, isMoving: false },
+  ],
+  switches: [
+    {
+      id: 'sw08_t1',
+      x: 2,
+      y: 2,
+      z: 0,
+      type: 'toggle',
+      isActivated: false,
+      label: 'Main Relay Alpha',
+    },
+    {
+      id: 'sw08_t2',
+      x: 8,
+      y: 2,
+      z: 0,
+      type: 'toggle',
+      isActivated: false,
+      label: 'Main Relay Beta',
+    },
+  ],
+  doors: [
+    {
+      id: 'door08_south',
+      x: 5,
+      y: 10,
+      z: 0,
+      width: 1,
+      height: 2,
+      orientation: 'EW',
+      isOpen: true,
+      leadsToRoom: 'sector_05',
+      spawnCoords: { x: 5, y: 1.5, z: 0 },
+    },
+    {
+      id: 'door08_east',
+      x: 10,
+      y: 5,
+      z: 0,
+      width: 1,
+      height: 2,
+      orientation: 'NS',
+      isOpen: true,
+      leadsToRoom: 'sector_09',
+      spawnCoords: { x: 1.5, y: 5, z: 0 },
+    },
+    {
+      id: 'door08_north',
+      x: 5,
+      y: 0,
+      z: 0,
+      width: 1,
+      height: 2,
+      orientation: 'EW',
+      isOpen: false,
+      requiredKeycard: 'RED',
+      leadsToRoom: 'sector_13',
+      spawnCoords: { x: 5, y: 9, z: 0 },
+    },
+  ],
+  lasers: [],
+  drones: [],
+  items: [
+    {
+      id: 'frag_02',
+      x: 5,
+      y: 5,
+      z: 1.3,
+      type: 'nexus_fragment',
+      fragmentId: 2,
+      isCollected: false,
+      name: 'Nexus Fragment II (Flux Core)',
+      description: 'Second of the 5 fragmented quantum crystals of the Overmind.',
+    },
+  ],
+  teleporters: [],
+  ambientColor: '#17130b',
+  accentColor: '#f59e0b',
+};
